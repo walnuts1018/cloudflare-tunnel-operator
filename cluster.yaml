@@ -1,0 +1,10 @@
+apiVersion: ctlptl.dev/v1alpha1
+kind: Registry
+name: cf-tunnel-operator-registry
+port: 5000
+---
+apiVersion: ctlptl.dev/v1alpha1
+kind: Cluster
+name: kind-cf-tunnel-operator-dev
+product: kind
+registry: cf-tunnel-operator-registry

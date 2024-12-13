@@ -1,0 +1,23 @@
+# permissions for end users to view cloudflaretunnels.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: cloudflare-tunnel-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: cloudflaretunnel-viewer-role
+rules:
+- apiGroups:
+  - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+  resources:
+  - cloudflaretunnels
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+  resources:
+  - cloudflaretunnels/status
+  verbs:
+  - get
