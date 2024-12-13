@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= ghcr.io/walnuts1018/cloudflare-tunnel-operator:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.31.0
 
@@ -88,6 +88,18 @@ lint: golangci-lint ## Run golangci-lint linter
 lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
 	$(GOLANGCI_LINT) run --fix
 
+#! [kind]
+.PHONY: start
+start: ## Start local Kubernetes cluster
+	ctlptl apply -f ./cluster.yaml
+	kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
+	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
+
+.PHONY: stop
+stop: ## Stop local Kubernetes cluster
+	ctlptl delete -f ./cluster.yaml
+#! [kind]
+
 ##@ Build
 
 .PHONY: build
@@ -131,6 +143,11 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	mkdir -p dist
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default > dist/install.yaml
+
+
+.PHONY: helm-build
+helm-build: ## Build helm chart
+	kustomize build config/default | helmify -crd-dir charts/code-server-operator
 
 ##@ Deployment
 
