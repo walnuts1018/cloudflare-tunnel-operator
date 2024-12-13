@@ -17,4 +17,13 @@ resources:
   kind: CloudflareTunnel
   path: github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1
   version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: cf-tunnel-operator.walnuts.dev
+  group: cf-tunnel-operator.walnuts.dev
+  kind: ClusterCloudflareTunnel
+  path: github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1
+  version: v1beta1
 version: "3"

@@ -1,13 +1,15 @@
----
+# permissions for end users to edit clustercloudflaretunnels.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: manager-role
+  labels:
+    app.kubernetes.io/name: cloudflare-tunnel-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: clustercloudflaretunnel-editor-role
 rules:
 - apiGroups:
   - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
   resources:
-  - cloudflaretunnels
   - clustercloudflaretunnels
   verbs:
   - create
@@ -20,16 +22,6 @@ rules:
 - apiGroups:
   - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
   resources:
-  - cloudflaretunnels/finalizers
-  - clustercloudflaretunnels/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
-  resources:
-  - cloudflaretunnels/status
   - clustercloudflaretunnels/status
   verbs:
   - get
-  - patch
-  - update

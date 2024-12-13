@@ -3,6 +3,7 @@
 # It should be run by config/default
 resources:
 - bases/cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev_cloudflaretunnels.yaml
+- bases/cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev_clustercloudflaretunnels.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:
