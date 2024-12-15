@@ -12,6 +12,8 @@ type CloudflareTunnelSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
+	Secret CloudflareTunnelSecret `json:"secret"`
+
 	// +kubebuilder:default="http_status:404"
 	// +optional
 	CatchAllRule string `json:"catchAllRule,omitempty"`
@@ -65,6 +67,12 @@ type CloudflareTunnelSpec struct {
 	// +kubebuilder:default=100
 	// +optional
 	KeepAliveConnections int32 `json:"keepAliveConnections,omitempty"`
+}
+
+type CloudflareTunnelSecret struct {
+	Name string `json:"name"`
+
+	Key string `json:"key"`
 }
 
 // CloudflareTunnelStatus defines the observed state of CloudflareTunnel.

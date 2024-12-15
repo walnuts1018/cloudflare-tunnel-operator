@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,6 +38,12 @@ type CloudflareTunnelReconciler struct {
 // +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels/finalizers,verbs=update
 
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitor,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=core,resources=events,verbs=create;update;patch
+
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
@@ -47,11 +54,25 @@ type CloudflareTunnelReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.19.1/pkg/reconcile
 func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	var cfTunnel cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel
 
-	return ctrl.Result{}, nil
+	err := r.Client.Get(ctx, req.NamespacedName, &cfTunnel)
+	if errors.IsNotFound(err) {
+		logger.Info("CloudflareTunnel has been deleted. Trying to delete its related resources.")
+		return ctrl.Result{}, nil
+	}
+	if err != nil {
+		// Error reading the object - requeue the request.
+		logger.Error(err, "Failed to get CloudflareTunnel.", "name", req.Name, "namespace", req.Namespace)
+		return ctrl.Result{}, err
+	}
+	if !cfTunnel.ObjectMeta.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, nil
+	}
+
+	return r.updateStatus(ctx, cfTunnel)
 }
 
 // SetupWithManager sets up the controller with the Manager.
