@@ -8,11 +8,11 @@
 #   - all
 registries:
 - type: standard
-  ref: v4.155.0 # renovate: depName=aquaproj/aqua-registry
+  ref: v4.276.0 # renovate: depName=aquaproj/aqua-registry
 packages:
-- name: kubernetes/kubectl@v1.29.3
-- name: kubernetes-sigs/kubebuilder@v3.14.0
-- name: kubernetes-sigs/kind@v0.22.0
-- name: tilt-dev/tilt@v0.33.11
-- name: tilt-dev/ctlptl@v0.8.28
-- name: arttor/helmify@v0.4.11
+- name: kubernetes/kubectl@v1.32.0
+- name: kubernetes-sigs/kubebuilder@v4.3.1
+- name: kubernetes-sigs/kind@v0.25.0
+- name: tilt-dev/tilt@v0.33.21
+- name: tilt-dev/ctlptl@v0.8.36
+- name: arttor/helmify@v0.4.16

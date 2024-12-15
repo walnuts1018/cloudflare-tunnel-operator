@@ -1,45 +1,94 @@
-/*
-Copyright 2024.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package v1beta1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // CloudflareTunnelSpec defines the desired state of CloudflareTunnel.
 type CloudflareTunnelSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of CloudflareTunnel. Edit cloudflaretunnel_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Replicas is the number of cloudflared pods.
+	// +kubebuilder:default=1
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
+	// +kubebuilder:default="http_status:404"
+	// +optional
+	CatchAllRule string `json:"catchAllRule,omitempty"`
+
+	// ---------- cloudflare api fields ----------
+
+	// Path to the certificate authority (CA) for the certificate of your origin. This option should be used only if your certificate is not signed by Cloudflare.
+	// +optional
+	CAPool *string `json:"caPool,omitempty"`
+
+	// Disables TLS verification of the certificate presented by your origin. Will allow any certificate from the origin to be accepted.
+	// +kubebuilder:default=false
+	// +optional
+	NoTLSVerify bool `json:"noTLSVerify,omitempty"`
+
+	// Timeout for completing a TLS handshake to your origin server, if you have chosen to connect Tunnel to an HTTPS server.
+	// +kubebuilder:default=10
+	// +optional
+	TLSTimeoutSeconds int32 `json:"tlsTimeoutSeconds,omitempty"`
+
+	// Attempt to connect to origin using HTTP2. Origin must be configured as https.
+	// +kubebuilder:default=true
+	// +optional
+	HTTP2Origin bool `json:"http2Origin,omitempty"`
+
+	// Disables chunked transfer encoding. Useful if you are running a WSGI server.
+	// +kubebuilder:default=false
+	// +optional
+	DisableChunkedEncoding bool `json:"disableChunkedEncoding,omitempty"`
+
+	// Timeout for establishing a new TCP connection to your origin server. This excludes the time taken to establish TLS, which is controlled by tlsTimeout.
+	// +kubebuilder:default=30
+	// +optional
+	ConnectTimeoutSeconds int32 `json:"connectTimeoutSeconds,omitempty"`
+
+	// Disable the “happy eyeballs” algorithm for IPv4/IPv6 fallback if your local network has misconfigured one of the protocols.
+	// +kubebuilder:default=false
+	// +optional
+	NoHappyEyeballs bool `json:"noHappyEyeballs,omitempty"`
+
+	// cloudflared starts a proxy server to translate HTTP traffic into TCP when proxying, for example, SSH or RDP. This configures what type of proxy will be started. Valid options are: "" for the regular proxy and "socks" for a SOCKS5 proxy.
+	// +optional
+	ProxyType string `json:"proxyType,omitempty"`
+
+	// Timeout after which an idle keepalive connection can be discarded.
+	// +kubebuilder:default=90
+	// +optional
+	KeepAliveTimeoutSeconds int32 `json:"keepAliveTimeoutSeconds,omitempty"`
+
+	// Maximum number of idle keepalive connections between Tunnel and your origin. This does not restrict the total number of concurrent connections.
+	// +kubebuilder:default=100
+	// +optional
+	KeepAliveConnections int32 `json:"keepAliveConnections,omitempty"`
 }
 
 // CloudflareTunnelStatus defines the observed state of CloudflareTunnel.
 type CloudflareTunnelStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Replicas is copied from the underlying Deployment's status.replicas.
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
+	TunnelID string `json:"tunnelID"`
+	// +listType=map
+	// +listMapKey=type
+	// +optional
+	Conditions []metav1.Condition `json:"conditions,omitempty"`
 }
+
+const (
+	TypeCloudflareTunnelAvailable = "Available"
+	TypeCloudflareTunnelDegraded  = "Degraded"
+)
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="REPLICAS",type="string",JSONPath=".spec.replicas",description="Replica Count"
+//+kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 
 // CloudflareTunnel is the Schema for the cloudflaretunnels API.
 type CloudflareTunnel struct {

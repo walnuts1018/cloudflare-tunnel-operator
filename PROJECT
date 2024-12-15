@@ -26,4 +26,9 @@ resources:
   kind: ClusterCloudflareTunnel
   path: github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1
   version: v1beta1
+- controller: true
+  domain: cf-tunnel-operator.walnuts.dev
+  group: networking.k8s.io
+  kind: Ingress
+  version: v1
 version: "3"
