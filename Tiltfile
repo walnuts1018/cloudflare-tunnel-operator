@@ -7,13 +7,13 @@ CMD ["/manager"]
 '''
 
 def manifests():
-    return 'controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
+    return './bin/controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
 
 def generate():
-    return 'controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
+    return './bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
 
 def binary():
-    return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/manager cmd/main.go'
+    return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/manager cmd/main.go;'
 
 # Generate manifests and go files
 local_resource('make manifests', manifests(), deps=["api", "internal", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
