@@ -15,7 +15,6 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - secrets
   - services
   verbs:
   - create
@@ -41,7 +40,6 @@ rules:
   - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
   resources:
   - cloudflaretunnels
-  - clustercloudflaretunnels
   verbs:
   - create
   - delete
@@ -54,14 +52,12 @@ rules:
   - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
   resources:
   - cloudflaretunnels/finalizers
-  - clustercloudflaretunnels/finalizers
   verbs:
   - update
 - apiGroups:
   - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
   resources:
   - cloudflaretunnels/status
-  - clustercloudflaretunnels/status
   verbs:
   - get
   - patch

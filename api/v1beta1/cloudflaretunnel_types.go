@@ -1,6 +1,7 @@
 package v1beta1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -17,6 +18,31 @@ type CloudflareTunnelSpec struct {
 	// +kubebuilder:default="http_status:404"
 	// +optional
 	CatchAllRule string `json:"catchAllRule,omitempty"`
+
+	// Specifies the resource requirements for code server pod.
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
+
+	// Specifies the image to use for the cloudflared pod.
+	// +kubebuilder:default="cloudflare/cloudflared:2024.12.1"
+	Image string `json:"image,omitempty"`
+
+	// Specifies the image pull policy for the cloudflared pod.
+	ArgsOverride []string `json:"argsOverride,omitempty"`
+
+	// Specifies the image pull policy for the cloudflared pod.
+	ExtraEnv EnvVarApplyConfigurationList `json:"extraEnv,omitempty"`
+
+	// Specifies the node selector for scheduling.
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// Specifies the tolerations for scheduling.
+	Tolerations TolerationApplyConfigurationList `json:"tolerations,omitempty"`
+
+	// Specifies the affinity for scheduling.
+	Affinity *AffinityApplyConfiguration `json:"affinity,omitempty"`
 
 	// ---------- cloudflare api fields ----------
 

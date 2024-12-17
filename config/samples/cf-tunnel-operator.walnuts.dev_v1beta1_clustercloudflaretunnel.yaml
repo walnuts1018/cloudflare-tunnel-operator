@@ -1,9 +1,0 @@
-apiVersion: cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev/v1beta1
-kind: ClusterCloudflareTunnel
-metadata:
-  labels:
-    app.kubernetes.io/name: cloudflare-tunnel-operator
-    app.kubernetes.io/managed-by: kustomize
-  name: clustercloudflaretunnel-sample
-spec:
-  # TODO(user): Add fields here
