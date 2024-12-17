@@ -12,7 +12,7 @@ registries:
 packages:
 - name: kubernetes/kubectl@v1.32.0
 - name: kubernetes-sigs/kubebuilder@v4.3.1
-- name: kubernetes-sigs/kind@v0.25.0
+- name: kubernetes-sigs/kind@v0.26.0
 - name: tilt-dev/tilt@v0.33.21
 - name: tilt-dev/ctlptl@v0.8.36
 - name: arttor/helmify@v0.4.16
