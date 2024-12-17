@@ -148,7 +148,7 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 
 .PHONY: helm-build
 helm-build: ## Build helm chart
-	kustomize build config/default | helmify -crd-dir charts/code-server-operator
+	kustomize build config/default | helmify -crd-dir charts/cloudflare-tunnel-operator
 
 ##@ Deployment
 
