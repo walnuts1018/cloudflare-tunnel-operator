@@ -1,0 +1,34 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "github>aquaproj/aqua-renovate-config#2.6.0"
+  ],
+  customManagers: [
+    {
+      customType: "regex",
+      fileMatch: [
+        "^k8s/.*/helm.jsonnet$",
+        "^k8s/.*/helm.libsonnet$",
+        "^k8s/.*/helm.yaml$",
+        "^k8s/.*/helm.yml$",
+      ],
+      matchStringsStrategy: "combination",
+      matchStrings: [
+        "chart:\\s+[\"']?(?<depName>[a-z0-9-]+)[\"']",
+        "repoURL:\\s+[\"']?(?<registryUrl>\\S+)[\"']",
+        "targetRevision:\\s+[\"']?(?<currentValue>\\S+)[\"']",
+      ],
+      datasourceTemplate: "helm",
+    },
+    {
+      customType: "regex",
+      fileMatch: "^k8s/apps/.*/kustomization.yaml$",
+      matchStringsStrategy: "any",
+      matchStrings: [
+        "\\/\\/\\s\\+kubebuilder:default=\"(?<depName>.*\\/.*?):(?<currentValue>.*)\"",
+      ],
+      datasourceTemplate: "docker",
+    },
+  ],
+}
