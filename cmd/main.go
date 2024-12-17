@@ -173,7 +173,6 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Ingress")
 		os.Exit(1)
 	}
-	// nolint:goconst
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = webhookcftunneloperatorwalnutsdevv1beta1.SetupCloudflareTunnelWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "CloudflareTunnel")
