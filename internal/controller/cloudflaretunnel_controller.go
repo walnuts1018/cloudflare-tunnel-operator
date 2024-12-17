@@ -294,7 +294,7 @@ func (r *CloudflareTunnelReconciler) reconcileService(ctx context.Context, cfTun
 		WithOwnerReferences(owner).
 		WithSpec(corev1apply.ServiceSpec().
 			WithPorts(corev1apply.ServicePort().
-				WithName("http").
+				WithName("metrics").
 				WithProtocol(corev1.ProtocolTCP).
 				WithPort(MetricsPort).
 				WithTargetPort(intstr.FromString("metrics")),

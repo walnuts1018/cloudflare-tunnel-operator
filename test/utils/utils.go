@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,9 +14,10 @@ import (
 )
 
 const (
-	prometheusOperatorVersion = "v0.77.1"
-	prometheusOperatorURL     = "https://github.com/prometheus-operator/prometheus-operator/" +
-		"releases/download/%s/bundle.yaml"
+	prometheusOperatorVersion = "v0.79.1"
+	prometheusOperatorRepoURL = "https://github.com/prometheus-operator/prometheus-operator/"
+	prometheusOperatorURL     = prometheusOperatorRepoURL + "releases/download/%s/bundle.yaml"
+	prometheusOperatorCRDsURL = prometheusOperatorRepoURL + "releases/download/%s/stripped-down-crds.yaml"
 
 	certmanagerVersion = "v1.16.0"
 	certmanagerURLTmpl = "https://github.com/jetstack/cert-manager/releases/download/%s/cert-manager.yaml"
@@ -42,6 +45,33 @@ func Run(cmd *exec.Cmd) (string, error) {
 	}
 
 	return string(output), nil
+}
+
+func DownloadPrometheusCRDsManifest() (path string, err error) {
+	url := fmt.Sprintf(prometheusOperatorCRDsURL, prometheusOperatorVersion)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to download CRDs manifest: %s", resp.Status)
+	}
+
+	tmpFile, err := os.CreateTemp("", "stripped-down-crds*.yaml")
+	if err != nil {
+		return "", err
+	}
+	defer tmpFile.Close()
+
+	_, err = io.Copy(tmpFile, resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return tmpFile.Name(), nil
 }
 
 // InstallPrometheusOperator installs the prometheus Operator to be used to export the enabled metrics.

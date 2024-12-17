@@ -3,7 +3,6 @@
 # It should be run by config/default
 resources:
 - bases/cf-tunnel-operator.walnuts.dev_cloudflaretunnels.yaml
-- https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/tags/kube-prometheus-stack-67.2.0/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:

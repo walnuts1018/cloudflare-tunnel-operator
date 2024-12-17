@@ -14,7 +14,7 @@
       ],
       datasourceTemplate: "docker",
     },
-        {
+    {
       customType: "regex",
       fileMatch: "^config/.*/kustomization.yaml$",
       matchStringsStrategy: "any",

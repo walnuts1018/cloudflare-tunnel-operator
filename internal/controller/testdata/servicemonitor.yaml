@@ -1,0 +1,23 @@
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/created-by: cloudflare-tunnel-operator
+    app.kubernetes.io/instance: test-name
+    app.kubernetes.io/name: cloudflared
+  name: test-name
+  namespace: default
+spec:
+  endpoints:
+  - path: /metrics
+    port: metrics
+    targetPort: metrics
+  jobLabel: cloudflared
+  namespaceSelector:
+    matchNames:
+    - default
+  selector:
+    matchLabels:
+      app.kubernetes.io/created-by: cloudflare-tunnel-operator
+      app.kubernetes.io/instance: test-name
+      app.kubernetes.io/name: cloudflared

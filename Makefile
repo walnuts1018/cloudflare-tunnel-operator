@@ -89,12 +89,12 @@ lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
 	$(GOLANGCI_LINT) run --fix
 
 #! [kind]
-.PHONY: start
+.PHONY: start 
 start: ## Start local Kubernetes cluster
 	ctlptl apply -f ./cluster.yaml
 	kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
 	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
-	kubectl apply -f https://github.com/prometheus-community/helm-charts/raw/refs/heads/main/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
+	kubectl apply -f https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/tags/kube-prometheus-stack-67.2.0/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
 
 .PHONY: stop
 stop: ## Stop local Kubernetes cluster

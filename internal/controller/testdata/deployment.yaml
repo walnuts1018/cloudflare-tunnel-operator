@@ -1,0 +1,173 @@
+# apiVersion: apps/v1
+# kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/created-by: cloudflare-tunnel-operator
+    app.kubernetes.io/instance: test-name
+    app.kubernetes.io/name: cloudflared
+  name: test-name
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/created-by: cloudflare-tunnel-operator
+      app.kubernetes.io/instance: test-name
+      app.kubernetes.io/name: cloudflared
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/created-by: cloudflare-tunnel-operator
+        app.kubernetes.io/instance: test-name
+        app.kubernetes.io/name: cloudflared
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                - value1
+                - value2
+              - key: key2
+                operator: NotIn
+                values:
+                - value3
+                - value4
+            weight: 1
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                - value1
+                - value2
+              - key: key2
+                operator: NotIn
+                values:
+                - value3
+                - value4
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: key1
+                  operator: In
+                  values:
+                  - value1
+                  - value2
+                - key: key2
+                  operator: NotIn
+                  values:
+                  - value3
+                  - value4
+              topologyKey: topologyKey1
+            weight: 1
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                - value1
+                - value2
+              - key: key2
+                operator: NotIn
+                values:
+                - value3
+                - value4
+            topologyKey: topologyKey1
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: key1
+                  operator: In
+                  values:
+                  - value1
+                  - value2
+                - key: key2
+                  operator: NotIn
+                  values:
+                  - value3
+                  - value4
+              topologyKey: topologyKey1
+            weight: 1
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                - value1
+                - value2
+              - key: key2
+                operator: NotIn
+                values:
+                - value3
+                - value4
+            topologyKey: topologyKey1
+      containers:
+      - args:
+        - args1
+        - args2
+        env:
+        - name: TUNNEL_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: cloudflared
+              name: cloudflared-token
+        - name: ENV1
+          value: value1
+        - name: ENV2
+          value: value2
+        image: registry/image:tag
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 1
+          httpGet:
+            path: /ready
+            port: metrics
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: cloudflared
+        ports:
+        - containerPort: 60123
+          name: metrics
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        terminationMessagePath:   "/dev/termination-log"
+        terminationMessagePolicy: "File"
+        securityContext:
+          readOnlyRootFilesystem: true
+      imagePullSecrets:
+      - name: image-pull-secret
+      nodeSelector:
+        key1: value1
+        key2: value2
+      securityContext:
+        sysctls:
+        - name: net.ipv4.ping_group_range
+          value: 0 2147483647
+      tolerations:
+      - effect: NoSchedule
+        key: key1
+        operator: Equal
+        value: value1
+      - effect: NoExecute
+        key: key2
+        operator: Exists
