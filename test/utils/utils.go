@@ -3,6 +3,7 @@ package utils
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -47,14 +48,22 @@ func Run(cmd *exec.Cmd) (string, error) {
 	return string(output), nil
 }
 
-func DownloadPrometheusCRDsManifest() (path string, err error) {
+func DownloadPrometheusCRDsManifest(ctx context.Context) (path string, err error) {
 	url := fmt.Sprintf(prometheusOperatorCRDsURL, prometheusOperatorVersion)
-
-	resp, err := http.Get(url)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			warnError(err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("failed to download CRDs manifest: %s", resp.Status)
@@ -64,7 +73,11 @@ func DownloadPrometheusCRDsManifest() (path string, err error) {
 	if err != nil {
 		return "", err
 	}
-	defer tmpFile.Close()
+	defer func() {
+		if err := tmpFile.Close(); err != nil {
+			warnError(err)
+		}
+	}()
 
 	_, err = io.Copy(tmpFile, resp.Body)
 	if err != nil {

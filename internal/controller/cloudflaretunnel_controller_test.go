@@ -14,7 +14,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/yaml"
 )
@@ -89,7 +88,7 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 			var gotDeployment *appsv1.Deployment
 			Eventually(func() error {
 				gotDeployment = &appsv1.Deployment{}
-				return k8sClient.Get(ctx, client.ObjectKey(namespacedName), gotDeployment)
+				return k8sClient.Get(ctx, namespacedName, gotDeployment)
 			}).Should(Succeed())
 			Expect(*gotDeployment).Should(HaveFields(*desiredDeployment))
 
@@ -102,7 +101,7 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 						Kind:       "Service",
 					},
 				}
-				return k8sClient.Get(ctx, client.ObjectKey(namespacedName), gotService)
+				return k8sClient.Get(ctx, namespacedName, gotService)
 			}).Should(Succeed())
 			Expect(*gotService).Should(HaveFields(*desiredService))
 
@@ -110,7 +109,7 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 			var gotServiceMonitor *monitoringv1.ServiceMonitor
 			Eventually(func() error {
 				gotServiceMonitor = &monitoringv1.ServiceMonitor{}
-				return k8sClient.Get(ctx, client.ObjectKey(namespacedName), gotServiceMonitor)
+				return k8sClient.Get(ctx, namespacedName, gotServiceMonitor)
 			}).Should(Succeed())
 			Expect(*gotServiceMonitor).Should(HaveFields(*desiredServiceMonitor))
 		})

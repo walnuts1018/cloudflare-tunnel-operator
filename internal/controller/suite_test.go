@@ -52,7 +52,7 @@ var _ = BeforeSuite(func() {
 
 	By("Download Prometheus CRDs manifest")
 	var err error
-	crdPath, err := utils.DownloadPrometheusCRDsManifest()
+	crdPath, err := utils.DownloadPrometheusCRDsManifest(ctx)
 	Expect(err).NotTo(HaveOccurred())
 
 	By("bootstrapping test environment")
