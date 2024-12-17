@@ -45,7 +45,6 @@ linters:
     # - contextcheck
     - durationcheck
     # - exhaustruct
-    - fatcontext
     - gocheckcompilerdirectives
     - intrange
     - loggercheck
