@@ -56,9 +56,9 @@ type CloudflareTunnelReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels/finalizers,verbs=update
+// +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels/finalizers,verbs=update
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete

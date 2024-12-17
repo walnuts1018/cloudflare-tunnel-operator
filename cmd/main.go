@@ -39,9 +39,9 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	cftunneloperatorwalnutsdevv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/controller"
-	webhookcftunneloperatorwalnutsdevv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/internal/webhook/v1beta1"
+	webhookcftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/internal/webhook/v1beta1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -53,7 +53,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(cftunneloperatorwalnutsdevv1beta1.AddToScheme(scheme))
+	utilruntime.Must(cftunneloperatorv1beta1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -174,7 +174,7 @@ func main() {
 		os.Exit(1)
 	}
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-		if err = webhookcftunneloperatorwalnutsdevv1beta1.SetupCloudflareTunnelWebhookWithManager(mgr); err != nil {
+		if err = webhookcftunneloperatorv1beta1.SetupCloudflareTunnelWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "CloudflareTunnel")
 			os.Exit(1)
 		}

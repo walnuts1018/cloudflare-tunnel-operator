@@ -1,4 +1,4 @@
 ## Append samples of your project ##
 resources:
-- cf-tunnel-operator.walnuts.dev_v1beta1_cloudflaretunnel.yaml
+- cf-tunnel-operator_v1beta1_cloudflaretunnel.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

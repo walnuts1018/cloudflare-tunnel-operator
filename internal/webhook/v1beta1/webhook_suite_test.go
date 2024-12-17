@@ -15,7 +15,7 @@ import (
 
 	admissionv1 "k8s.io/api/admission/v1"
 
-	cftunneloperatorwalnutsdevv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 
 	// +kubebuilder:scaffold:imports
 	apimachineryruntime "k8s.io/apimachinery/pkg/runtime"
@@ -76,7 +76,7 @@ var _ = BeforeSuite(func() {
 	Expect(cfg).NotTo(BeNil())
 
 	scheme := apimachineryruntime.NewScheme()
-	err = cftunneloperatorwalnutsdevv1beta1.AddToScheme(scheme)
+	err = cftunneloperatorv1beta1.AddToScheme(scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	err = admissionv1.AddToScheme(scheme)

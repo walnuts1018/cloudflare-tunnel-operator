@@ -15,10 +15,6 @@ type CloudflareTunnelSpec struct {
 
 	Secret CloudflareTunnelSecret `json:"secret"`
 
-	// +kubebuilder:default="http_status:404"
-	// +optional
-	CatchAllRule string `json:"catchAllRule,omitempty"`
-
 	// Specifies the resource requirements for code server pod.
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
@@ -56,6 +52,10 @@ type CloudflareTunnelSpec struct {
 	WithServiceMonitor bool `json:"withServiceMonitor,omitempty"`
 
 	// ---------- cloudflare api fields ----------
+
+	// +kubebuilder:default="http_status:404"
+	// +optional
+	CatchAllRule string `json:"catchAllRule,omitempty"`
 
 	// Path to the certificate authority (CA) for the certificate of your origin. This option should be used only if your certificate is not signed by Cloudflare.
 	// +optional

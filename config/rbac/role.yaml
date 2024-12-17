@@ -37,7 +37,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+  - cf-tunnel-operator.walnuts.dev
   resources:
   - cloudflaretunnels
   verbs:
@@ -49,13 +49,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+  - cf-tunnel-operator.walnuts.dev
   resources:
   - cloudflaretunnels/finalizers
   verbs:
   - update
 - apiGroups:
-  - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+  - cf-tunnel-operator.walnuts.dev
   resources:
   - cloudflaretunnels/status
   verbs:

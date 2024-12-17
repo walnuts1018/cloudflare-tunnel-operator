@@ -2,7 +2,7 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: cf-tunnel-operator.walnuts.dev
+domain: walnuts.dev
 layout:
 - go.kubebuilder.io/v4
 projectName: cloudflare-tunnel-operator
@@ -12,8 +12,8 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: cf-tunnel-operator.walnuts.dev
-  group: cf-tunnel-operator.walnuts.dev
+  domain: walnuts.dev
+  group: cf-tunnel-operator
   kind: CloudflareTunnel
   path: github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1
   version: v1beta1
@@ -21,9 +21,4 @@ resources:
     defaulting: true
     validation: true
     webhookVersion: v1
-- controller: true
-  domain: cf-tunnel-operator.walnuts.dev
-  group: networking.k8s.io
-  kind: Ingress
-  version: v1
 version: "3"

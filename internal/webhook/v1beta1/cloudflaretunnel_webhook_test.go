@@ -4,21 +4,21 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	cftunneloperatorwalnutsdevv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	// TODO (user): Add any additional imports if needed
 )
 
 var _ = Describe("CloudflareTunnel Webhook", func() {
 	var (
-		obj       *cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel
-		oldObj    *cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel
+		obj       *cftunneloperatorv1beta1.CloudflareTunnel
+		oldObj    *cftunneloperatorv1beta1.CloudflareTunnel
 		validator CloudflareTunnelCustomValidator
 		defaulter CloudflareTunnelCustomDefaulter
 	)
 
 	BeforeEach(func() {
-		obj = &cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel{}
-		oldObj = &cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel{}
+		obj = &cftunneloperatorv1beta1.CloudflareTunnel{}
+		oldObj = &cftunneloperatorv1beta1.CloudflareTunnel{}
 		validator = CloudflareTunnelCustomValidator{}
 		Expect(validator).NotTo(BeNil(), "Expected validator to be initialized")
 		defaulter = CloudflareTunnelCustomDefaulter{}

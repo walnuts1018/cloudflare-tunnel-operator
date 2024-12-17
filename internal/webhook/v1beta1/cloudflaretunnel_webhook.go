@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	cftunneloperatorwalnutsdevv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -17,7 +17,7 @@ var cloudflaretunnellog = logf.Log.WithName("cloudflaretunnel-resource")
 
 // SetupCloudflareTunnelWebhookWithManager registers the webhook for CloudflareTunnel in the manager.
 func SetupCloudflareTunnelWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).For(&cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel{}).
+	return ctrl.NewWebhookManagedBy(mgr).For(&cftunneloperatorv1beta1.CloudflareTunnel{}).
 		WithValidator(&CloudflareTunnelCustomValidator{}).
 		WithDefaulter(&CloudflareTunnelCustomDefaulter{}).
 		Complete()
@@ -25,7 +25,7 @@ func SetupCloudflareTunnelWebhookWithManager(mgr ctrl.Manager) error {
 
 // TODO(user): EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-// +kubebuilder:webhook:path=/mutate-cf-tunnel-operator-walnuts-dev-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel,mutating=true,failurePolicy=fail,sideEffects=None,groups=cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=create;update,versions=v1beta1,name=mcloudflaretunnel-v1beta1.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/mutate-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel,mutating=true,failurePolicy=fail,sideEffects=None,groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=create;update,versions=v1beta1,name=mcloudflaretunnel-v1beta1.kb.io,admissionReviewVersions=v1
 
 // CloudflareTunnelCustomDefaulter struct is responsible for setting default values on the custom resource of the
 // Kind CloudflareTunnel when those are created or updated.
@@ -40,7 +40,7 @@ var _ webhook.CustomDefaulter = &CloudflareTunnelCustomDefaulter{}
 
 // Default implements webhook.CustomDefaulter so a webhook will be registered for the Kind CloudflareTunnel.
 func (d *CloudflareTunnelCustomDefaulter) Default(ctx context.Context, obj runtime.Object) error {
-	cloudflaretunnel, ok := obj.(*cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel)
+	cloudflaretunnel, ok := obj.(*cftunneloperatorv1beta1.CloudflareTunnel)
 
 	if !ok {
 		return fmt.Errorf("expected an CloudflareTunnel object but got %T", obj)
@@ -55,7 +55,7 @@ func (d *CloudflareTunnelCustomDefaulter) Default(ctx context.Context, obj runti
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 // NOTE: The 'path' attribute must follow a specific pattern and should not be modified directly here.
 // Modifying the path for an invalid path can cause API server errors; failing to locate the webhook.
-// +kubebuilder:webhook:path=/validate-cf-tunnel-operator-walnuts-dev-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel,mutating=false,failurePolicy=fail,sideEffects=None,groups=cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=create;update,versions=v1beta1,name=vcloudflaretunnel-v1beta1.kb.io,admissionReviewVersions=v1
+// +kubebuilder:webhook:path=/validate-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel,mutating=false,failurePolicy=fail,sideEffects=None,groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=create;update,versions=v1beta1,name=vcloudflaretunnel-v1beta1.kb.io,admissionReviewVersions=v1
 
 // CloudflareTunnelCustomValidator struct is responsible for validating the CloudflareTunnel resource
 // when it is created, updated, or deleted.
@@ -70,7 +70,7 @@ var _ webhook.CustomValidator = &CloudflareTunnelCustomValidator{}
 
 // ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type CloudflareTunnel.
 func (v *CloudflareTunnelCustomValidator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	cloudflaretunnel, ok := obj.(*cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel)
+	cloudflaretunnel, ok := obj.(*cftunneloperatorv1beta1.CloudflareTunnel)
 	if !ok {
 		return nil, fmt.Errorf("expected a CloudflareTunnel object but got %T", obj)
 	}
@@ -81,7 +81,7 @@ func (v *CloudflareTunnelCustomValidator) ValidateCreate(ctx context.Context, ob
 
 // ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type CloudflareTunnel.
 func (v *CloudflareTunnelCustomValidator) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
-	cloudflaretunnel, ok := newObj.(*cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel)
+	cloudflaretunnel, ok := newObj.(*cftunneloperatorv1beta1.CloudflareTunnel)
 	if !ok {
 		return nil, fmt.Errorf("expected a CloudflareTunnel object for the newObj but got %T", newObj)
 	}
@@ -94,7 +94,7 @@ func (v *CloudflareTunnelCustomValidator) ValidateUpdate(ctx context.Context, ol
 
 // ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type CloudflareTunnel.
 func (v *CloudflareTunnelCustomValidator) ValidateDelete(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
-	cloudflaretunnel, ok := obj.(*cftunneloperatorwalnutsdevv1beta1.CloudflareTunnel)
+	cloudflaretunnel, ok := obj.(*cftunneloperatorv1beta1.CloudflareTunnel)
 	if !ok {
 		return nil, fmt.Errorf("expected a CloudflareTunnel object but got %T", obj)
 	}

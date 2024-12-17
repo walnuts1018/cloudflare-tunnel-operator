@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.4
-  name: cloudflaretunnels.cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+  name: cloudflaretunnels.cf-tunnel-operator.walnuts.dev
 spec:
-  group: cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+  group: cf-tunnel-operator.walnuts.dev
   names:
     kind: CloudflareTunnel
     listKind: CloudflareTunnelList

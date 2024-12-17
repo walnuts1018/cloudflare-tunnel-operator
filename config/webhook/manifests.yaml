@@ -10,12 +10,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-cf-tunnel-operator-walnuts-dev-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel
+      path: /mutate-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel
   failurePolicy: Fail
   name: mcloudflaretunnel-v1beta1.kb.io
   rules:
   - apiGroups:
-    - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+    - cf-tunnel-operator.walnuts.dev
     apiVersions:
     - v1beta1
     operations:
@@ -36,12 +36,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-cf-tunnel-operator-walnuts-dev-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel
+      path: /validate-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel
   failurePolicy: Fail
   name: vcloudflaretunnel-v1beta1.kb.io
   rules:
   - apiGroups:
-    - cf-tunnel-operator.walnuts.dev.cf-tunnel-operator.walnuts.dev
+    - cf-tunnel-operator.walnuts.dev
     apiVersions:
     - v1beta1
     operations:
