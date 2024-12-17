@@ -1,0 +1,131 @@
+apiVersion: cf-tunnel-operator.walnuts.dev/v1beta1
+kind: CloudflareTunnel
+metadata:
+  name: test-name
+  namespace: default
+spec:
+  replicas: 2
+  secret:
+    name: cloudflared
+    key:  cloudflared-token
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  imagePullSecrets:
+    - name: image-pull-secret
+  image: registry/image:tag
+  argsOverride:
+    - args1
+    - args2
+  extraEnv:
+    - name: ENV1
+      value: value1
+    - name: ENV2
+      value: value2 
+  nodeSelector:
+    key1: value1
+    key2: value2
+  tolerations:
+    - key: key1
+      operator: Equal
+      value: value1
+      effect: NoSchedule
+    - key: key2
+      operator: Exists
+      effect: NoExecute
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                  - value1
+                  - value2
+              - key: key2
+                operator: NotIn
+                values:
+                  - value3
+                  - value4
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                  - value1
+                  - value2
+              - key: key2
+                operator: NotIn
+                values:
+                  - value3
+                  - value4
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                  - value1
+                  - value2
+              - key: key2
+                operator: NotIn
+                values:
+                  - value3
+                  - value4
+          topologyKey: topologyKey1
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: key1
+                  operator: In
+                  values:
+                    - value1
+                    - value2
+                - key: key2
+                  operator: NotIn
+                  values:
+                    - value3
+                    - value4
+            topologyKey: topologyKey1
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: key1
+                operator: In
+                values:
+                  - value1
+                  - value2
+              - key: key2
+                operator: NotIn
+                values:
+                  - value3
+                  - value4
+          topologyKey: topologyKey1
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: key1
+                  operator: In
+                  values:
+                    - value1
+                    - value2
+                - key: key2
+                  operator: NotIn
+                  values:
+                    - value3
+                    - value4
+            topologyKey: topologyKey1
+  enableServiceMonitor: true

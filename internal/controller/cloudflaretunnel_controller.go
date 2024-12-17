@@ -1,19 +1,3 @@
-/*
-Copyright 2024.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package controller
 
 import (
@@ -141,7 +125,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 	}
 	envs = append(envs, cfTunnel.Spec.ExtraEnv...)
 
-	var resourceRequirements *corev1apply.ResourceRequirementsApplyConfiguration
+	resourceRequirements := corev1apply.ResourceRequirements()
 	if cfTunnel.Spec.Resources.Limits != nil {
 		cpu, ok := cfTunnel.Spec.Resources.Limits[corev1.ResourceCPU]
 		if !ok {
@@ -355,7 +339,7 @@ func (r *CloudflareTunnelReconciler) reconcileService(ctx context.Context, cfTun
 func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel) error {
 	logger := log.FromContext(ctx)
 
-	if !cfTunnel.Spec.WithServiceMonitor {
+	if !cfTunnel.Spec.EnableServiceMonitor {
 		return nil
 	}
 

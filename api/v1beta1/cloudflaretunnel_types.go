@@ -49,7 +49,7 @@ type CloudflareTunnelSpec struct {
 
 	// Specifies the service account name.
 	// +kubebuilder:default=true
-	WithServiceMonitor bool `json:"withServiceMonitor,omitempty"`
+	EnableServiceMonitor bool `json:"enableServiceMonitor,omitempty"`
 
 	// ---------- cloudflare api fields ----------
 
