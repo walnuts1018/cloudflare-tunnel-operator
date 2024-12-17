@@ -205,7 +205,7 @@ func GetProjectDir() (string, error) {
 // of the target content. The target content may span multiple lines.
 func UncommentCode(filename, target, prefix string) error {
 	// false positive
-	// nolint:gosec
+	//nolint:gosec
 	content, err := os.ReadFile(filename)
 	if err != nil {
 		return err
@@ -246,6 +246,6 @@ func UncommentCode(filename, target, prefix string) error {
 		return err
 	}
 	// false positive
-	// nolint:gosec
+	//nolint:gosec
 	return os.WriteFile(filename, out.Bytes(), 0644)
 }

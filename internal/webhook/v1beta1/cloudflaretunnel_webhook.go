@@ -12,7 +12,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// nolint:unused
 // log is for logging in this package.
 var cloudflaretunnellog = logf.Log.WithName("cloudflaretunnel-resource")
 
@@ -76,8 +75,6 @@ func (v *CloudflareTunnelCustomValidator) ValidateCreate(ctx context.Context, ob
 		return nil, fmt.Errorf("expected a CloudflareTunnel object but got %T", obj)
 	}
 	cloudflaretunnellog.Info("Validation for CloudflareTunnel upon creation", "name", cloudflaretunnel.GetName())
-
-	
 
 	return nil, nil
 }
