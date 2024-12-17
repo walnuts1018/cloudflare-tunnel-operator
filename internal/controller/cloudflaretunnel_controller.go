@@ -62,7 +62,7 @@ type CloudflareTunnelReconciler struct {
 
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitor,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=core,resources=events,verbs=create;update;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -376,12 +376,14 @@ func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context
 			sm.Spec.Endpoints = make([]monitoringv1.Endpoint, 0)
 		}
 
-		sm.Spec.Endpoints = append(sm.Spec.Endpoints, monitoringv1.Endpoint{
-			Port:        "metrics",
-			TargetPort:  ptr.To(intstr.FromString("metrics")),
-			Path:        "/metrics",
-			HonorLabels: false,
-		})
+		sm.Spec.Endpoints = []monitoringv1.Endpoint{
+			{
+				Port:        "metrics",
+				TargetPort:  ptr.To(intstr.FromString("metrics")),
+				Path:        "/metrics",
+				HonorLabels: false,
+			},
+		}
 
 		sm.Spec.JobLabel = appName
 
@@ -416,7 +418,60 @@ func (r *CloudflareTunnelReconciler) updateStatus(ctx context.Context, cfTunnel 
 		Reason: "OK",
 	})
 
-	return ctrl.Result{}, nil
+	var svc corev1.Service
+	if err := r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &svc); err != nil {
+		if errors.IsNotFound(err) {
+			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+				Type:    cftv1beta1.TypeCloudflareTunnelDegraded,
+				Status:  metav1.ConditionTrue,
+				Reason:  "Reconciling",
+				Message: "Service not found",
+			})
+			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+				Type:   cftv1beta1.TypeCloudflareTunnelAvailable,
+				Status: metav1.ConditionFalse,
+				Reason: "Reconciling",
+			})
+		} else {
+			return ctrl.Result{}, err
+		}
+	}
+
+	var dep appsv1.Deployment
+	if err := r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &dep); err != nil {
+		if errors.IsNotFound(err) {
+			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+				Type:    cftv1beta1.TypeCloudflareTunnelDegraded,
+				Status:  metav1.ConditionTrue,
+				Reason:  "Reconciling",
+				Message: "Deployment not found",
+			})
+			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+				Type:   cftv1beta1.TypeCloudflareTunnelAvailable,
+				Status: metav1.ConditionFalse,
+				Reason: "Reconciling",
+			})
+		} else {
+			return ctrl.Result{}, err
+		}
+	}
+
+	result := ctrl.Result{}
+	if dep.Status.AvailableReplicas == 0 {
+		meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+			Type:    cftv1beta1.TypeCloudflareTunnelAvailable,
+			Status:  metav1.ConditionFalse,
+			Reason:  "Unavailable",
+			Message: "AvailableReplicas is 0",
+		})
+		result = ctrl.Result{Requeue: true}
+	}
+
+	if err := r.Status().Update(ctx, &cfTunnel); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return result, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

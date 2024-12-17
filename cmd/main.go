@@ -28,6 +28,8 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog/v2"
 
+	"github.com/go-logr/logr"
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -37,9 +39,9 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/go-logr/logr"
 	cftunneloperatorwalnutsdevv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/controller"
+	webhookcftunneloperatorwalnutsdevv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/internal/webhook/v1beta1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -128,6 +130,11 @@ func main() {
 		// this setup is not recommended for production.
 	}
 
+	if err := monitoringv1.AddToScheme(scheme); err != nil {
+		setupLog.Error(err, "unable to add prometheus-operator scheme")
+		os.Exit(1)
+	}
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		Metrics:                metricsServerOptions,
@@ -165,6 +172,13 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Ingress")
 		os.Exit(1)
+	}
+	// nolint:goconst
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = webhookcftunneloperatorwalnutsdevv1beta1.SetupCloudflareTunnelWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "CloudflareTunnel")
+			os.Exit(1)
+		}
 	}
 	// +kubebuilder:scaffold:builder
 

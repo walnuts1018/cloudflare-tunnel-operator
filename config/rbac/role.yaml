@@ -65,7 +65,7 @@ rules:
 - apiGroups:
   - monitoring.coreos.com
   resources:
-  - servicemonitor
+  - servicemonitors
   verbs:
   - create
   - delete
@@ -75,28 +75,10 @@ rules:
   - update
   - watch
 - apiGroups:
-  - networking.k8s.io.cf-tunnel-operator.walnuts.dev
+  - networking.k8s.io
   resources:
   - ingresses
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
-- apiGroups:
-  - networking.k8s.io.cf-tunnel-operator.walnuts.dev
-  resources:
-  - ingresses/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - networking.k8s.io.cf-tunnel-operator.walnuts.dev
-  resources:
-  - ingresses/status
-  verbs:
-  - get
-  - patch
-  - update

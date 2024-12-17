@@ -6,4 +6,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
   name: cloudflaretunnel-sample
 spec:
-  # TODO(user): Add fields here
+  replicas: 2
+  secret:
+    name: cloudflared
+    key:  cloudflared-token

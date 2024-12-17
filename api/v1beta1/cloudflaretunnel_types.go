@@ -20,28 +20,35 @@ type CloudflareTunnelSpec struct {
 	CatchAllRule string `json:"catchAllRule,omitempty"`
 
 	// Specifies the resource requirements for code server pod.
+	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 
 	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this PodSpec.
+	// +optional
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
 
 	// Specifies the image to use for the cloudflared pod.
 	// +kubebuilder:default="cloudflare/cloudflared:2024.12.1"
+	// +optional
 	Image string `json:"image,omitempty"`
 
 	// Specifies the image pull policy for the cloudflared pod.
+	// +optional
 	ArgsOverride []string `json:"argsOverride,omitempty"`
 
 	// Specifies the image pull policy for the cloudflared pod.
+	// +optional
 	ExtraEnv EnvVarApplyConfigurationList `json:"extraEnv,omitempty"`
 
 	// Specifies the node selector for scheduling.
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// Specifies the tolerations for scheduling.
+	// +optional
 	Tolerations TolerationApplyConfigurationList `json:"tolerations,omitempty"`
 
 	// Specifies the affinity for scheduling.
+	// +optional
 	Affinity *AffinityApplyConfiguration `json:"affinity,omitempty"`
 
 	// Specifies the service account name.
@@ -100,8 +107,11 @@ type CloudflareTunnelSpec struct {
 }
 
 type CloudflareTunnelSecret struct {
+	// Specifies the secret name.
 	Name string `json:"name"`
 
+	// Specifies the secret key.
+	// +kubebuilder:default="cloudflared-token"
 	Key string `json:"key"`
 }
 

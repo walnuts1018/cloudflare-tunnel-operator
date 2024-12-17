@@ -10,7 +10,10 @@ spec:
       containers:
         - command:
             - /manager
-          args: null
+          args:
+            - --leader-elect
+            - --health-probe-bind-address=:8081 
+            - --log-level=debug
           name: manager
           securityContext: null
           resources: null

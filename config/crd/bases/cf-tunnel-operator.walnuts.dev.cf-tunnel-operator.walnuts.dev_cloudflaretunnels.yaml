@@ -740,8 +740,11 @@ spec:
               secret:
                 properties:
                   key:
+                    default: cloudflared-token
+                    description: Specifies the secret key.
                     type: string
                   name:
+                    description: Specifies the secret name.
                     type: string
                 required:
                 - key

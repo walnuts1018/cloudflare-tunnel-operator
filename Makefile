@@ -94,6 +94,7 @@ start: ## Start local Kubernetes cluster
 	ctlptl apply -f ./cluster.yaml
 	kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.yaml
 	kubectl -n cert-manager wait --for=condition=available --timeout=180s --all deployments
+	kubectl apply -f https://github.com/prometheus-community/helm-charts/raw/refs/heads/main/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml
 
 .PHONY: stop
 stop: ## Stop local Kubernetes cluster
