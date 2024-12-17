@@ -40,6 +40,31 @@ linters:
     - unconvert
     - unparam
     - unused
+    - asasalint
+    - containedctx
+    # - contextcheck
+    - durationcheck
+    # - exhaustruct
+    - fatcontext
+    - gocheckcompilerdirectives
+    - intrange
+    - loggercheck
+    - makezero
+    - mirror
+    - nilerr
+    - noctx
+    - nolintlint
+    - perfsprint
+    - predeclared
+    - reassign
+    - rowserrcheck
+    - sloglint
+    - sqlclosecheck
+    - tenv
+    - testableexamples
+    - thelper
+    - usestdlibvars
+
 
 linters-settings:
   revive:
