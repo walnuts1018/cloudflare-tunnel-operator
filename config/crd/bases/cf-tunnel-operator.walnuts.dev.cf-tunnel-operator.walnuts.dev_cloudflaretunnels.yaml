@@ -775,6 +775,10 @@ spec:
                       type: string
                   type: object
                 type: array
+              withServiceMonitor:
+                default: true
+                description: Specifies the service account name.
+                type: boolean
             required:
             - secret
             type: object

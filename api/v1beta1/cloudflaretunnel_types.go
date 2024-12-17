@@ -44,6 +44,10 @@ type CloudflareTunnelSpec struct {
 	// Specifies the affinity for scheduling.
 	Affinity *AffinityApplyConfiguration `json:"affinity,omitempty"`
 
+	// Specifies the service account name.
+	// +kubebuilder:default=true
+	WithServiceMonitor bool `json:"withServiceMonitor,omitempty"`
+
 	// ---------- cloudflare api fields ----------
 
 	// Path to the certificate authority (CA) for the certificate of your origin. This option should be used only if your certificate is not signed by Cloudflare.

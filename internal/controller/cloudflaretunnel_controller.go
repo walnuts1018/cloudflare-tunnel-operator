@@ -40,6 +40,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -352,6 +353,54 @@ func (r *CloudflareTunnelReconciler) reconcileService(ctx context.Context, cfTun
 }
 
 func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel) error {
+	logger := log.FromContext(ctx)
+
+	if !cfTunnel.Spec.WithServiceMonitor {
+		return nil
+	}
+
+	sm := &monitoringv1.ServiceMonitor{}
+	sm.SetNamespace(cfTunnel.Namespace)
+	sm.SetName(cfTunnel.Name)
+	sm.SetLabels(labels(cfTunnel))
+
+	op, err := ctrl.CreateOrUpdate(ctx, r.Client, sm, func() error {
+		if sm.Spec.Selector.MatchLabels == nil {
+			sm.Spec.Selector.MatchLabels = make(map[string]string)
+		}
+		for name, content := range labels(cfTunnel) {
+			sm.Spec.Selector.MatchLabels[name] = content
+		}
+
+		if sm.Spec.Endpoints == nil {
+			sm.Spec.Endpoints = make([]monitoringv1.Endpoint, 0)
+		}
+
+		sm.Spec.Endpoints = append(sm.Spec.Endpoints, monitoringv1.Endpoint{
+			Port:        "metrics",
+			TargetPort:  ptr.To(intstr.FromString("metrics")),
+			Path:        "/metrics",
+			HonorLabels: false,
+		})
+
+		sm.Spec.JobLabel = appName
+
+		if sm.Spec.NamespaceSelector.MatchNames == nil {
+			sm.Spec.NamespaceSelector.MatchNames = make([]string, 0, 1)
+		}
+
+		sm.Spec.NamespaceSelector.MatchNames = []string{cfTunnel.Namespace}
+
+		return nil
+	})
+
+	if err != nil {
+		logger.Error(err, "unable to create or update ServiceMonitor", "name", cfTunnel.Name, "namespace", cfTunnel.Namespace)
+		return err
+	}
+	if op != controllerutil.OperationResultNone {
+		logger.Info("reconcile ServiceMonitor", "operation", op)
+	}
 	return nil
 }
 
