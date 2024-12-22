@@ -51,8 +51,11 @@ type CloudflareTunnelSpec struct {
 	// +kubebuilder:default=true
 	EnableServiceMonitor bool `json:"enableServiceMonitor,omitempty"`
 
-	// ---------- cloudflare api fields ----------
+	// +optional
+	Settings CloudflareTunnelSettings `json:"settings,omitempty"`
+}
 
+type CloudflareTunnelSettings struct {
 	// +kubebuilder:default="http_status:404"
 	// +optional
 	CatchAllRule string `json:"catchAllRule,omitempty"`

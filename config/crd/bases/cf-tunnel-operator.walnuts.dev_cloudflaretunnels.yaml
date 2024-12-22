@@ -519,26 +519,6 @@ spec:
                 items:
                   type: string
                 type: array
-              caPool:
-                description: Path to the certificate authority (CA) for the certificate
-                  of your origin. This option should be used only if your certificate
-                  is not signed by Cloudflare.
-                type: string
-              catchAllRule:
-                default: http_status:404
-                type: string
-              connectTimeoutSeconds:
-                default: 30
-                description: Timeout for establishing a new TCP connection to your
-                  origin server. This excludes the time taken to establish TLS, which
-                  is controlled by tlsTimeout.
-                format: int32
-                type: integer
-              disableChunkedEncoding:
-                default: false
-                description: Disables chunked transfer encoding. Useful if you are
-                  running a WSGI server.
-                type: boolean
               enableServiceMonitor:
                 default: true
                 description: Specifies the service account name.
@@ -612,11 +592,6 @@ spec:
                       type: object
                   type: object
                 type: array
-              http2Origin:
-                default: true
-                description: Attempt to connect to origin using HTTP2. Origin must
-                  be configured as https.
-                type: boolean
               image:
                 default: cloudflare/cloudflared:2024.12.1
                 description: Specifies the image to use for the cloudflared pod.
@@ -642,41 +617,11 @@ spec:
                   type: object
                   x-kubernetes-map-type: atomic
                 type: array
-              keepAliveConnections:
-                default: 100
-                description: Maximum number of idle keepalive connections between
-                  Tunnel and your origin. This does not restrict the total number
-                  of concurrent connections.
-                format: int32
-                type: integer
-              keepAliveTimeoutSeconds:
-                default: 90
-                description: Timeout after which an idle keepalive connection can
-                  be discarded.
-                format: int32
-                type: integer
-              noHappyEyeballs:
-                default: false
-                description: Disable the “happy eyeballs” algorithm for IPv4/IPv6
-                  fallback if your local network has misconfigured one of the protocols.
-                type: boolean
-              noTLSVerify:
-                default: false
-                description: Disables TLS verification of the certificate presented
-                  by your origin. Will allow any certificate from the origin to be
-                  accepted.
-                type: boolean
               nodeSelector:
                 additionalProperties:
                   type: string
                 description: Specifies the node selector for scheduling.
                 type: object
-              proxyType:
-                description: 'cloudflared starts a proxy server to translate HTTP
-                  traffic into TCP when proxying, for example, SSH or RDP. This configures
-                  what type of proxy will be started. Valid options are: "" for the
-                  regular proxy and "socks" for a SOCKS5 proxy.'
-                type: string
               replicas:
                 default: 1
                 description: Replicas is the number of cloudflared pods.
@@ -754,12 +699,71 @@ spec:
                 - key
                 - name
                 type: object
-              tlsTimeoutSeconds:
-                default: 10
-                description: Timeout for completing a TLS handshake to your origin
-                  server, if you have chosen to connect Tunnel to an HTTPS server.
-                format: int32
-                type: integer
+              settings:
+                properties:
+                  caPool:
+                    description: Path to the certificate authority (CA) for the certificate
+                      of your origin. This option should be used only if your certificate
+                      is not signed by Cloudflare.
+                    type: string
+                  catchAllRule:
+                    default: http_status:404
+                    type: string
+                  connectTimeoutSeconds:
+                    default: 30
+                    description: Timeout for establishing a new TCP connection to
+                      your origin server. This excludes the time taken to establish
+                      TLS, which is controlled by tlsTimeout.
+                    format: int32
+                    type: integer
+                  disableChunkedEncoding:
+                    default: false
+                    description: Disables chunked transfer encoding. Useful if you
+                      are running a WSGI server.
+                    type: boolean
+                  http2Origin:
+                    default: true
+                    description: Attempt to connect to origin using HTTP2. Origin
+                      must be configured as https.
+                    type: boolean
+                  keepAliveConnections:
+                    default: 100
+                    description: Maximum number of idle keepalive connections between
+                      Tunnel and your origin. This does not restrict the total number
+                      of concurrent connections.
+                    format: int32
+                    type: integer
+                  keepAliveTimeoutSeconds:
+                    default: 90
+                    description: Timeout after which an idle keepalive connection
+                      can be discarded.
+                    format: int32
+                    type: integer
+                  noHappyEyeballs:
+                    default: false
+                    description: Disable the “happy eyeballs” algorithm for IPv4/IPv6
+                      fallback if your local network has misconfigured one of the
+                      protocols.
+                    type: boolean
+                  noTLSVerify:
+                    default: false
+                    description: Disables TLS verification of the certificate presented
+                      by your origin. Will allow any certificate from the origin to
+                      be accepted.
+                    type: boolean
+                  proxyType:
+                    description: 'cloudflared starts a proxy server to translate HTTP
+                      traffic into TCP when proxying, for example, SSH or RDP. This
+                      configures what type of proxy will be started. Valid options
+                      are: "" for the regular proxy and "socks" for a SOCKS5 proxy.'
+                    type: string
+                  tlsTimeoutSeconds:
+                    default: 10
+                    description: Timeout for completing a TLS handshake to your origin
+                      server, if you have chosen to connect Tunnel to an HTTPS server.
+                    format: int32
+                    type: integer
+                type: object
               tolerations:
                 description: Specifies the tolerations for scheduling.
                 items:
