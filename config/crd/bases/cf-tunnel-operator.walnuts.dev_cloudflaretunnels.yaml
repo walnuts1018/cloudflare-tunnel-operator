@@ -519,6 +519,11 @@ spec:
                 items:
                   type: string
                 type: array
+              default:
+                default: false
+                description: Default specifies whether this tunnel should be the default
+                  tunnel in the cluster.
+                type: boolean
               enableServiceMonitor:
                 default: true
                 description: Specifies the service account name.
@@ -787,6 +792,7 @@ spec:
                   type: object
                 type: array
             required:
+            - default
             - secret
             type: object
           status:

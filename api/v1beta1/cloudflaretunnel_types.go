@@ -7,6 +7,9 @@ import (
 
 // CloudflareTunnelSpec defines the desired state of CloudflareTunnel.
 type CloudflareTunnelSpec struct {
+	// Default specifies whether this tunnel should be the default tunnel in the cluster.
+	// +kubebuilder:default=false
+	Default bool `json:"default"`
 
 	// Replicas is the number of cloudflared pods.
 	// +kubebuilder:default=1
