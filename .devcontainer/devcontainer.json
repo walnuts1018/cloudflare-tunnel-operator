@@ -1,6 +1,6 @@
 {
   "name": "Kubebuilder DevContainer",
-  "image": "golang:1.23",
+  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:fe130ccbd569de609a9afbf06517305d69d775e3-3",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/git:1": {}
@@ -18,8 +18,5 @@
         "ms-azuretools.vscode-docker"
       ]
     }
-  },
-
-  "onCreateCommand": "bash .devcontainer/post-install.sh"
+  }
 }
-
