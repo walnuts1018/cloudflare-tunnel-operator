@@ -110,6 +110,8 @@ github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.79.0 h
 github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.79.0/go.mod h1:AVMP4QEW8xuGWnxaWSpI3kKjP9fDA31nO68zsyREJZA=
 github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.79.1 h1:Dwk9xYZOd8gq+nhlZREvHbQ6enj3yjC5HPFOdcReqGw=
 github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.79.1/go.mod h1:AVMP4QEW8xuGWnxaWSpI3kKjP9fDA31nO68zsyREJZA=
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.79.2 h1:DGv150w4UyxnjNHlkCw85R3+lspOxegtdnbpP2vKRrk=
+github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.79.2/go.mod h1:AVMP4QEW8xuGWnxaWSpI3kKjP9fDA31nO68zsyREJZA=
 github.com/prometheus/client_golang v1.19.1 h1:wZWJDwK+NameRJuPGDhlnFgx8e8HN3XHQeLaYJFJBOE=
 github.com/prometheus/client_golang v1.19.1/go.mod h1:mP78NwGzrVks5S2H6ab8+ZZGJLZUq1hoULYBAYBw1Ho=
 github.com/prometheus/client_model v0.6.1 h1:ZKSh/rekM+n3CeS952MLRAdFwIKqeY8b62p8ais2e9E=
