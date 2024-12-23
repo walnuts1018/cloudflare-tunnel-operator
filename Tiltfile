@@ -7,10 +7,10 @@ CMD ["/manager"]
 '''
 
 def manifests():
-    return './bin/controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
+    return 'controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
 
 def generate():
-    return './bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
+    return 'controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
 
 def binary():
     return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/manager cmd/main.go;'

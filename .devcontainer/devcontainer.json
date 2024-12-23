@@ -1,8 +1,8 @@
 {
   "name": "Kubebuilder DevContainer",
-  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:fe130ccbd569de609a9afbf06517305d69d775e3-3",
+  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:b96cf70f83e54e929a8ab6322729b133c6e66cce-7",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/git:1": {}
   },
 
@@ -15,7 +15,9 @@
       },
       "extensions": [
         "ms-kubernetes-tools.vscode-kubernetes-tools",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "golang.go",
+        "kennylong.kubernetes-yaml-formatter",
       ]
     }
   }
