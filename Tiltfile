@@ -43,5 +43,5 @@ docker_build_with_restart(
 )
 
 local_resource(
-    'Sample', 'kubectl apply -f ./config/samples/cf-tunnel-operator_v1beta1_cloudflaretunnel.yaml',
-    deps=["./config/samples/cf-tunnel-operator_v1beta1_cloudflaretunnel.yaml"])
+    'Sample', 'kustomize build ./config/samples | kubectl apply -f -',
+    deps=["./config/samples"])

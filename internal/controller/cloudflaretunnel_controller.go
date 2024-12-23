@@ -118,8 +118,8 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 			WithName("TUNNEL_TOKEN").
 			WithValueFrom(corev1apply.EnvVarSource().
 				WithSecretKeyRef(corev1apply.SecretKeySelector().
-					WithName(cfTunnel.Spec.Secret.Key).
-					WithKey(cfTunnel.Spec.Secret.Name),
+					WithName(cfTunnel.Spec.Secret.Name).
+					WithKey(cfTunnel.Spec.Secret.Key),
 				),
 			),
 	}

@@ -1,4 +1,5 @@
 ## Append samples of your project ##
 resources:
+- secret.yaml
 - cf-tunnel-operator_v1beta1_cloudflaretunnel.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -23,5 +23,5 @@
   },
 
   "postCreateCommand": "make setup",
-  "postStartCommand": "tilt up --host 0.0.0.0"
+  // "postStartCommand": "tilt up --host 0.0.0.0"
 }
