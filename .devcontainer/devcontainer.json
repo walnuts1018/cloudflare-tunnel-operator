@@ -1,6 +1,6 @@
 {
   "name": "Kubebuilder DevContainer",
-  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:6ccf3c70ecf9f2c3bedde6e185daec1566a62986-10",
+  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:7f15aa6f6a668b7da85a06cec14be04c7db9e457-12",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/git:1": {}
@@ -20,5 +20,8 @@
         "kennylong.kubernetes-yaml-formatter",
       ]
     }
-  }
+  },
+
+  "postCreateCommand": "make setup",
+  "postStartCommand": "tilt up --host 0.0.0.0"
 }

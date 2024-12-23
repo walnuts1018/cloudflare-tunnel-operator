@@ -20,7 +20,7 @@ aqua i
 ### Start Cluster
 
 ```shell
-make start
+make setup
 tilt up --host 0.0.0.0
 ```
 
