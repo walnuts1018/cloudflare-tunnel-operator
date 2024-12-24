@@ -85,10 +85,10 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 			}
 
 			mockCloudflareTunnelManager.EXPECT().CreateTunnel(ctx, cloudflareTunnel.Name).Return(domain.CloudflareTunnel{
-				ID:     "test-id",
-				Name:   cloudflareTunnel.Name,
-				Secret: "dummy",
+				ID:   "test-id",
+				Name: cloudflareTunnel.Name,
 			}, nil)
+			mockCloudflareTunnelManager.EXPECT().GetTunnelToken(ctx, "test-id").Return(domain.CloudflareTunnelToken("test-token"), nil)
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: namespacedName,

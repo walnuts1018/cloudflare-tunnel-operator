@@ -7,6 +7,3 @@ metadata:
   name: cloudflaretunnel-sample
 spec:
   replicas: 2
-  secret:
-    name: cloudflared
-    key:  cloudflared-token

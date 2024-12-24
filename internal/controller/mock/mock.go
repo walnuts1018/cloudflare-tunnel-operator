@@ -70,3 +70,18 @@ func (mr *MockCloudflareTunnelManagerMockRecorder) GetTunnel(ctx, ID any) *gomoc
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTunnel", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).GetTunnel), ctx, ID)
 }
+
+// GetTunnelToken mocks base method.
+func (m *MockCloudflareTunnelManager) GetTunnelToken(ctx context.Context, tunnelId string) (domain.CloudflareTunnelToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTunnelToken", ctx, tunnelId)
+	ret0, _ := ret[0].(domain.CloudflareTunnelToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTunnelToken indicates an expected call of GetTunnelToken.
+func (mr *MockCloudflareTunnelManagerMockRecorder) GetTunnelToken(ctx, tunnelId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTunnelToken", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).GetTunnelToken), ctx, tunnelId)
+}

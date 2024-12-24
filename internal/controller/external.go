@@ -16,4 +16,5 @@ var (
 type CloudflareTunnelManager interface {
 	CreateTunnel(ctx context.Context, Name string) (domain.CloudflareTunnel, error)
 	GetTunnel(ctx context.Context, ID string) (domain.CloudflareTunnel, error)
+	GetTunnelToken(ctx context.Context, tunnelId string) (domain.CloudflareTunnelToken, error)
 }

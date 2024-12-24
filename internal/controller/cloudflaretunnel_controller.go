@@ -84,7 +84,7 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, nil
 	}
 
-	tunnel, err := r.reconcileTunnel(ctx, cfTunnel)
+	tunnel, token, err := r.reconcileTunnel(ctx, cfTunnel)
 	if err != nil {
 		result, err2 := r.updateStatus(ctx, cfTunnel)
 		if err2 != nil {
@@ -93,13 +93,19 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return result, err
 	}
 
-	secretName, err := r.reconcileSecret(ctx, cfTunnel, tunnel.Secret)
+	secretName, err := r.reconcileSecret(ctx, cfTunnel, token)
 	if err != nil {
 		result, err2 := r.updateStatus(ctx, cfTunnel)
 		if err2 != nil {
 			logger.Error(err2, "Failed to update CloudflareTunnel status.", "name", req.Name, "namespace", req.Namespace)
 		}
 		return result, err
+	}
+
+	cfTunnel.Status.TunnelID = tunnel.ID
+	cfTunnel.Status.TunnelName = tunnel.Name
+	if err := r.Status().Update(ctx, &cfTunnel); err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to update CloudflareTunnel status: %w", err)
 	}
 
 	if err := r.reconcileDeployment(ctx, cfTunnel, secretName); err != nil {
@@ -129,34 +135,36 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	return r.updateStatus(ctx, cfTunnel)
 }
 
-func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel) (domain.CloudflareTunnel, error) {
+func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel) (domain.CloudflareTunnel, domain.CloudflareTunnelToken, error) {
 	var secret corev1.Secret
 	if err := r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &secret); err != nil {
 		if !apierrors.IsNotFound(err) {
-			return domain.CloudflareTunnel{}, fmt.Errorf("failed to get secret: %w", err)
+			return domain.CloudflareTunnel{}, "", fmt.Errorf("failed to get secret: %w", err)
 		}
 	}
 
-	var token string
+	var token domain.CloudflareTunnelToken
 	if secret.Data != nil {
-		token = string(secret.Data[tunnelTokenKey])
+		token = domain.CloudflareTunnelToken(secret.Data[tunnelTokenKey])
 	}
 
 	if cfTunnel.Status.TunnelID != "" {
 		// TunnelIDがStatusに存在していて、Secretも存在している場合は、再利用する
 		if token != "" {
 			return domain.CloudflareTunnel{
-				ID:     cfTunnel.Status.TunnelID,
-				Name:   cfTunnel.Name,
-				Secret: token,
-			}, nil
+				ID:   cfTunnel.Status.TunnelID,
+				Name: cfTunnel.Name,
+			}, domain.CloudflareTunnelToken(token), nil
 		} else {
-			tunnel, err := r.CloudflareTunnelManager.GetTunnel(ctx, cfTunnel.Status.TunnelID)
+			token, err := r.CloudflareTunnelManager.GetTunnelToken(ctx, cfTunnel.Status.TunnelID)
 			if err == nil {
-				return tunnel, nil
+				return domain.CloudflareTunnel{
+					ID:   cfTunnel.Status.TunnelID,
+					Name: cfTunnel.Name,
+				}, token, nil
 			} else {
 				if !errors.Is(err, ErrTunnelNotFound) {
-					return domain.CloudflareTunnel{}, fmt.Errorf("failed to get tunnel: %w", err)
+					return domain.CloudflareTunnel{}, "", fmt.Errorf("failed to get tunnel: %w", err)
 				}
 			}
 		}
@@ -165,13 +173,18 @@ func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunn
 	// TunnelIDがStatusに存在していないので、Tunnelを作成する
 	tunnel, err := r.CloudflareTunnelManager.CreateTunnel(ctx, cfTunnel.Name)
 	if err != nil {
-		return domain.CloudflareTunnel{}, fmt.Errorf("failed to create tunnel: %w", err)
+		return domain.CloudflareTunnel{}, "", fmt.Errorf("failed to create tunnel: %w", err)
 	}
 
-	return tunnel, nil
+	token, err = r.CloudflareTunnelManager.GetTunnelToken(ctx, tunnel.ID)
+	if err != nil {
+		return domain.CloudflareTunnel{}, "", fmt.Errorf("failed to get tunnel token: %w", err)
+	}
+
+	return tunnel, token, nil
 }
 
-func (r *CloudflareTunnelReconciler) reconcileSecret(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel, token string) (types.NamespacedName, error) {
+func (r *CloudflareTunnelReconciler) reconcileSecret(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel, token domain.CloudflareTunnelToken) (types.NamespacedName, error) {
 	logger := log.FromContext(ctx)
 
 	namespacedName := types.NamespacedName{

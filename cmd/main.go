@@ -19,6 +19,7 @@ import (
 	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/controller"
 	webhookcftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/internal/webhook/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/external"
+	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/utils/random"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -156,7 +157,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfManager, err := external.NewCloudflareTunnelClient(cfg.CloudflareAPIToken, cfg.CloudflareAccountID)
+	cfManager, err := external.NewCloudflareTunnelClient(cfg.CloudflareAPIToken, cfg.CloudflareAccountID, random.New())
 	if err != nil {
 		setupLog.Error(err, "unable to create Cloudflare Tunnel client")
 		os.Exit(1)
@@ -171,8 +172,9 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.IngressReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:                  mgr.GetClient(),
+		Scheme:                  mgr.GetScheme(),
+		CloudflareTunnelManager: cfManager,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Ingress")
 		os.Exit(1)

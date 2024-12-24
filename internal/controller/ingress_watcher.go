@@ -66,6 +66,10 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, fmt.Errorf("cloudflare tunnel is being deleted: %w", ErrCloudflareTunnelNotFound)
 	}
 
+	if err := r.updateCloudflareTunnelConfig(ctx, cfTunnel, *ingress); err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to update Cloudflare Tunnel config: %w", err)
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -101,6 +105,15 @@ func (r *IngressReconciler) getCloudflareTunnel(ctx context.Context, cfTunnelNam
 }
 
 func (r *IngressReconciler) updateCloudflareTunnelConfig(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel, ingress networkingv1.Ingress) error {
+	tunnelID := cfTunnel.Status.TunnelID
+	if tunnelID == "" {
+		return fmt.Errorf("tunnel ID is empty: %w", ErrCloudflareTunnelNotFound)
+	}
+
+	
+
+
+
 	return nil
 }
 
