@@ -120,8 +120,8 @@ spec:
         - name: TUNNEL_TOKEN
           valueFrom:
             secretKeyRef:
-              name: cloudflared
-              key:  cloudflared-token
+              name: test-name
+              key:  cloudflared-tunnel-token
         - name: ENV1
           value: value1
         - name: ENV2

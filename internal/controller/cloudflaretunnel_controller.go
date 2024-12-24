@@ -2,20 +2,23 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	appsv1apply "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1apply "k8s.io/client-go/applyconfigurations/core/v1"
@@ -29,15 +32,17 @@ import (
 )
 
 const (
-	appName     = "cloudflared"
-	managerName = "cloudflare-tunnel-operator"
-	MetricsPort = 60123
+	appName        = "cloudflared"
+	managerName    = "cloudflare-tunnel-operator"
+	MetricsPort    = 60123
+	tunnelTokenKey = "cloudflared-tunnel-token"
 )
 
 // CloudflareTunnelReconciler reconciles a CloudflareTunnel object
 type CloudflareTunnelReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme                  *runtime.Scheme
+	CloudflareTunnelManager CloudflareTunnelManager
 }
 
 // +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=get;list;watch;create;update;patch;delete
@@ -46,6 +51,7 @@ type CloudflareTunnelReconciler struct {
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=events,verbs=create;update;patch
 
@@ -64,7 +70,7 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	var cfTunnel cftv1beta1.CloudflareTunnel
 
 	err := r.Client.Get(ctx, req.NamespacedName, &cfTunnel)
-	if errors.IsNotFound(err) {
+	if apierrors.IsNotFound(err) {
 		logger.Info("CloudflareTunnel has been deleted. Trying to delete its related resources.")
 		return ctrl.Result{}, nil
 	}
@@ -78,7 +84,25 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, nil
 	}
 
-	if err := r.reconcileDeployment(ctx, cfTunnel); err != nil {
+	tunnel, err := r.reconcileTunnel(ctx, cfTunnel)
+	if err != nil {
+		result, err2 := r.updateStatus(ctx, cfTunnel)
+		if err2 != nil {
+			logger.Error(err2, "Failed to update CloudflareTunnel status.", "name", req.Name, "namespace", req.Namespace)
+		}
+		return result, err
+	}
+
+	secretName, err := r.reconcileSecret(ctx, cfTunnel, tunnel.Secret)
+	if err != nil {
+		result, err2 := r.updateStatus(ctx, cfTunnel)
+		if err2 != nil {
+			logger.Error(err2, "Failed to update CloudflareTunnel status.", "name", req.Name, "namespace", req.Namespace)
+		}
+		return result, err
+	}
+
+	if err := r.reconcileDeployment(ctx, cfTunnel, secretName); err != nil {
 		result, err2 := r.updateStatus(ctx, cfTunnel)
 		if err2 != nil {
 			logger.Error(err2, "Failed to update CloudflareTunnel status.", "name", req.Name, "namespace", req.Namespace)
@@ -105,7 +129,106 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	return r.updateStatus(ctx, cfTunnel)
 }
 
-func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel) error {
+func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel) (domain.CloudflareTunnel, error) {
+	var secret corev1.Secret
+	if err := r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &secret); err != nil {
+		if !apierrors.IsNotFound(err) {
+			return domain.CloudflareTunnel{}, fmt.Errorf("failed to get secret: %w", err)
+		}
+	}
+
+	var token string
+	if secret.Data != nil {
+		token = string(secret.Data[tunnelTokenKey])
+	}
+
+	if cfTunnel.Status.TunnelID != "" {
+		// TunnelIDがStatusに存在していて、Secretも存在している場合は、再利用する
+		if token != "" {
+			return domain.CloudflareTunnel{
+				ID:     cfTunnel.Status.TunnelID,
+				Name:   cfTunnel.Name,
+				Secret: token,
+			}, nil
+		} else {
+			tunnel, err := r.CloudflareTunnelManager.GetTunnel(ctx, cfTunnel.Status.TunnelID)
+			if err == nil {
+				return tunnel, nil
+			} else {
+				if !errors.Is(err, ErrTunnelNotFound) {
+					return domain.CloudflareTunnel{}, fmt.Errorf("failed to get tunnel: %w", err)
+				}
+			}
+		}
+	}
+
+	// TunnelIDがStatusに存在していないので、Tunnelを作成する
+	tunnel, err := r.CloudflareTunnelManager.CreateTunnel(ctx, cfTunnel.Name)
+	if err != nil {
+		return domain.CloudflareTunnel{}, fmt.Errorf("failed to create tunnel: %w", err)
+	}
+
+	return tunnel, nil
+}
+
+func (r *CloudflareTunnelReconciler) reconcileSecret(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel, token string) (types.NamespacedName, error) {
+	logger := log.FromContext(ctx)
+
+	namespacedName := types.NamespacedName{
+		Namespace: cfTunnel.Namespace,
+		Name:      cfTunnel.Name,
+	}
+
+	owner, err := controllerReference(cfTunnel, r.Scheme)
+	if err != nil {
+		return types.NamespacedName{}, fmt.Errorf("failed to create controller reference: %w", err)
+	}
+
+	labels := appLabels(cfTunnel)
+
+	secret := corev1apply.Secret(namespacedName.Name, namespacedName.Namespace).
+		WithLabels(labels).
+		WithOwnerReferences(owner).
+		WithData(
+			map[string][]byte{
+				tunnelTokenKey: []byte(token),
+			},
+		)
+
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(secret)
+	if err != nil {
+		return types.NamespacedName{}, fmt.Errorf("failed to convert secret to unstructured: %w", err)
+	}
+
+	patch := &unstructured.Unstructured{
+		Object: obj,
+	}
+
+	var current corev1.Service
+	err = r.Client.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
+	if err != nil && !apierrors.IsNotFound(err) {
+		return types.NamespacedName{}, fmt.Errorf("failed to get secret: %w", err)
+	}
+
+	currentApplyConfig, err := corev1apply.ExtractService(&current, managerName)
+	if err != nil {
+		return types.NamespacedName{}, fmt.Errorf("failed to extract apply configuration from secret: %w", err)
+	}
+
+	if equality.Semantic.DeepEqual(secret, currentApplyConfig) {
+		return namespacedName, nil
+	}
+
+	if err = r.Patch(ctx, patch, client.Apply, &client.PatchOptions{FieldManager: managerName, Force: ptr.To(true)}); err != nil {
+		return types.NamespacedName{}, fmt.Errorf("failed to apply secret: %w", err)
+	}
+
+	logger.Info("Secret has been reconciled.", "name", cfTunnel.Name, "namespace", cfTunnel.Namespace)
+
+	return namespacedName, nil
+}
+
+func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel, secretName types.NamespacedName) error {
 	logger := log.FromContext(ctx)
 
 	owner, err := controllerReference(cfTunnel, r.Scheme)
@@ -118,8 +241,8 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 			WithName("TUNNEL_TOKEN").
 			WithValueFrom(corev1apply.EnvVarSource().
 				WithSecretKeyRef(corev1apply.SecretKeySelector().
-					WithName(cfTunnel.Spec.Secret.Name).
-					WithKey(cfTunnel.Spec.Secret.Key),
+					WithName(secretName.Name).
+					WithKey(tunnelTokenKey),
 				),
 			),
 	}
@@ -196,7 +319,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 		args = cfTunnel.Spec.ArgsOverride
 	}
 
-	labels := labels(cfTunnel)
+	labels := appLabels(cfTunnel)
 	deployment := appsv1apply.Deployment(cfTunnel.Name, cfTunnel.Namespace).
 		WithLabels(labels).
 		WithOwnerReferences(owner).
@@ -257,7 +380,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 	var current appsv1.Deployment
 	err = r.Client.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
 
-	if err != nil && !errors.IsNotFound(err) {
+	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("failed to get deployment: %w", err)
 	}
 
@@ -287,7 +410,7 @@ func (r *CloudflareTunnelReconciler) reconcileService(ctx context.Context, cfTun
 		return fmt.Errorf("failed to create controller reference: %w", err)
 	}
 
-	labels := labels(cfTunnel)
+	labels := appLabels(cfTunnel)
 
 	service := corev1apply.Service(cfTunnel.Name, cfTunnel.Namespace).
 		WithLabels(labels).
@@ -314,7 +437,7 @@ func (r *CloudflareTunnelReconciler) reconcileService(ctx context.Context, cfTun
 
 	var current corev1.Service
 	err = r.Client.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
-	if err != nil && !errors.IsNotFound(err) {
+	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("failed to get service: %w", err)
 	}
 
@@ -346,13 +469,13 @@ func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context
 	sm := &monitoringv1.ServiceMonitor{}
 	sm.SetNamespace(cfTunnel.Namespace)
 	sm.SetName(cfTunnel.Name)
-	sm.SetLabels(labels(cfTunnel))
+	sm.SetLabels(appLabels(cfTunnel))
 
 	op, err := ctrl.CreateOrUpdate(ctx, r.Client, sm, func() error {
 		if sm.Spec.Selector.MatchLabels == nil {
 			sm.Spec.Selector.MatchLabels = make(map[string]string)
 		}
-		for name, content := range labels(cfTunnel) {
+		for name, content := range appLabels(cfTunnel) {
 			sm.Spec.Selector.MatchLabels[name] = content
 		}
 
@@ -402,9 +525,43 @@ func (r *CloudflareTunnelReconciler) updateStatus(ctx context.Context, cfTunnel 
 		Reason: "OK",
 	})
 
+	if cfTunnel.Status.TunnelID == "" {
+		meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+			Type:    cftv1beta1.TypeCloudflareTunnelDegraded,
+			Status:  metav1.ConditionTrue,
+			Reason:  "Reconciling",
+			Message: "Cloudflare Tunnel is not ready yet",
+		})
+		meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+			Type:   cftv1beta1.TypeCloudflareTunnelAvailable,
+			Status: metav1.ConditionFalse,
+			Reason: "Reconciling",
+		})
+		return ctrl.Result{}, nil
+	}
+
+	var secret corev1.Secret
+	if err := r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &secret); err != nil {
+		if apierrors.IsNotFound(err) {
+			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+				Type:    cftv1beta1.TypeCloudflareTunnelDegraded,
+				Status:  metav1.ConditionTrue,
+				Reason:  "Reconciling",
+				Message: "Secret not found",
+			})
+			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
+				Type:   cftv1beta1.TypeCloudflareTunnelAvailable,
+				Status: metav1.ConditionFalse,
+				Reason: "Reconciling",
+			})
+		} else {
+			return ctrl.Result{}, err
+		}
+	}
+
 	var svc corev1.Service
 	if err := r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &svc); err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
 				Type:    cftv1beta1.TypeCloudflareTunnelDegraded,
 				Status:  metav1.ConditionTrue,
@@ -423,7 +580,7 @@ func (r *CloudflareTunnelReconciler) updateStatus(ctx context.Context, cfTunnel 
 
 	var dep appsv1.Deployment
 	if err := r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &dep); err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			meta.SetStatusCondition(&cfTunnel.Status.Conditions, metav1.Condition{
 				Type:    cftv1beta1.TypeCloudflareTunnelDegraded,
 				Status:  metav1.ConditionTrue,
@@ -484,7 +641,7 @@ func controllerReference(cfTunnel cftv1beta1.CloudflareTunnel, scheme *runtime.S
 	return ref, nil
 }
 
-func labels(cfTunnel cftv1beta1.CloudflareTunnel) map[string]string {
+func appLabels(cfTunnel cftv1beta1.CloudflareTunnel) map[string]string {
 	return map[string]string{
 		"app.kubernetes.io/name":       appName,
 		"app.kubernetes.io/instance":   cfTunnel.Name,

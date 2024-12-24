@@ -9,14 +9,13 @@ import (
 type CloudflareTunnelSpec struct {
 	// Default specifies whether this tunnel should be the default tunnel in the cluster.
 	// +kubebuilder:default=false
+	// +optional
 	Default bool `json:"default"`
 
 	// Replicas is the number of cloudflared pods.
 	// +kubebuilder:default=1
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
-
-	Secret CloudflareTunnelSecret `json:"secret"`
 
 	// Specifies the resource requirements for code server pod.
 	// +optional
@@ -112,22 +111,18 @@ type CloudflareTunnelSettings struct {
 	KeepAliveConnections int32 `json:"keepAliveConnections,omitempty"`
 }
 
-type CloudflareTunnelSecret struct {
-	// Specifies the secret name.
-	Name string `json:"name"`
-
-	// Specifies the secret key.
-	// +kubebuilder:default="cloudflared-token"
-	Key string `json:"key"`
-}
-
 // CloudflareTunnelStatus defines the observed state of CloudflareTunnel.
 type CloudflareTunnelStatus struct {
 	// Replicas is copied from the underlying Deployment's status.replicas.
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
+	// +optional
+	TunnelName string `json:"tunnelName"`
+
+	// +optional
 	TunnelID string `json:"tunnelID"`
+
 	// +listType=map
 	// +listMapKey=type
 	// +optional

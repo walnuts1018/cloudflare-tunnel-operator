@@ -16,6 +16,7 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/test/utils"
+	"go.uber.org/mock/gomock"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -32,9 +33,13 @@ var k8sClient client.Client
 var testEnv *envtest.Environment
 var ctx context.Context
 var cancel context.CancelFunc
+var gomockctrl *gomock.Controller
 
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
+
+	gomockctrl = gomock.NewController(t)
+	defer gomockctrl.Finish()
 
 	RunSpecs(t, "Controller Suite")
 }

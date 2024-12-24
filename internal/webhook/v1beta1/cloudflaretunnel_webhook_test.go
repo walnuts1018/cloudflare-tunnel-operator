@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/consts"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -26,7 +27,7 @@ var _ = Describe("CloudflareTunnel Webhook", func() {
 				Name:      "default-tunnel",
 				Namespace: "default",
 				Labels: map[string]string{
-					defaultKey: "true",
+					consts.DefaultLabelKey: "true",
 				},
 			},
 			Spec: cftv1beta1.CloudflareTunnelSpec{
@@ -55,22 +56,22 @@ var _ = Describe("CloudflareTunnel Webhook", func() {
 	})
 
 	Context("When creating CloudflareTunnel under Defaulting Webhook", func() {
-		It(fmt.Sprintf("Default Tunnelのとき、%s Labelに%vが設定される", defaultKey, true), func() {
+		It(fmt.Sprintf("Default Tunnelのとき、%s Labelに%vが設定される", consts.DefaultLabelKey, true), func() {
 			By("objectのdefaultフィールドをtrueに設定")
 			obj.Spec.Default = true
 			By("calling the Default method to apply defaults")
 			defaulter.Default(ctx, obj)
-			By(fmt.Sprintf("Labelsに%sが設定されていることを確認", defaultKey))
-			Expect(obj.ObjectMeta.Labels[defaultKey]).To(Equal("true"))
+			By(fmt.Sprintf("Labelsに%sが設定されていることを確認", consts.DefaultLabelKey))
+			Expect(obj.ObjectMeta.Labels[consts.DefaultLabelKey]).To(Equal("true"))
 		})
 
-		It(fmt.Sprintf("Default Tunnelでないとき、%s Labelに%vが設定される", defaultKey, false), func() {
+		It(fmt.Sprintf("Default Tunnelでないとき、%s Labelに%vが設定される", consts.DefaultLabelKey, false), func() {
 			By("objectのdefaultフィールドをfalseに設定")
 			obj.Spec.Default = false
 			By("calling the Default method to apply defaults")
 			defaulter.Default(ctx, obj)
-			By(fmt.Sprintf("Labelsに%sが設定されていることを確認", defaultKey))
-			Expect(obj.ObjectMeta.Labels[defaultKey]).To(Equal("false"))
+			By(fmt.Sprintf("Labelsに%sが設定されていることを確認", consts.DefaultLabelKey))
+			Expect(obj.ObjectMeta.Labels[consts.DefaultLabelKey]).To(Equal("false"))
 		})
 	})
 

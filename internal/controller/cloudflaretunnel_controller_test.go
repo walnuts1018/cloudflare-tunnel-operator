@@ -8,6 +8,8 @@ import (
 	. "github.com/onsi/gomega"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	mock_controller "github.com/walnuts1018/cloudflare-tunnel-operator/internal/controller/mock"
+	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
 	. "github.com/walnuts1018/cloudflare-tunnel-operator/test/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -74,10 +76,19 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
+			mockCloudflareTunnelManager := mock_controller.NewMockCloudflareTunnelManager(gomockctrl)
+
 			controllerReconciler := &CloudflareTunnelReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
+				Client:                  k8sClient,
+				Scheme:                  k8sClient.Scheme(),
+				CloudflareTunnelManager: mockCloudflareTunnelManager,
 			}
+
+			mockCloudflareTunnelManager.EXPECT().CreateTunnel(ctx, cloudflareTunnel.Name).Return(domain.CloudflareTunnel{
+				ID:     "test-id",
+				Name:   cloudflareTunnel.Name,
+				Secret: "dummy",
+			}, nil)
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: namespacedName,

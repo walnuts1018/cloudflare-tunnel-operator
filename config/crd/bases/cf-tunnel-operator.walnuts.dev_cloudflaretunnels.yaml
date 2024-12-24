@@ -691,19 +691,6 @@ spec:
                       More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                     type: object
                 type: object
-              secret:
-                properties:
-                  key:
-                    default: cloudflared-token
-                    description: Specifies the secret key.
-                    type: string
-                  name:
-                    description: Specifies the secret name.
-                    type: string
-                required:
-                - key
-                - name
-                type: object
               settings:
                 properties:
                   caPool:
@@ -791,9 +778,6 @@ spec:
                       type: string
                   type: object
                 type: array
-            required:
-            - default
-            - secret
             type: object
           status:
             description: CloudflareTunnelStatus defines the observed state of CloudflareTunnel.
@@ -863,8 +847,8 @@ spec:
                 type: integer
               tunnelID:
                 type: string
-            required:
-            - tunnelID
+              tunnelName:
+                type: string
             type: object
         type: object
     served: true

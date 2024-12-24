@@ -9,6 +9,9 @@ CMD ["/manager"]
 def manifests():
     return 'controller-gen crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'
 
+def go_generate():
+    return 'go generate ./...;'
+
 def generate():
     return 'controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./...";'
 
@@ -17,7 +20,7 @@ def binary():
 
 # Generate manifests and go files
 local_resource('make manifests', manifests(), deps=["api", "internal", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
-local_resource('make generate', generate(), deps=["api", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
+local_resource('make generate', go_generate() + generate(), deps=["api", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
 
 # Deploy CRD
 local_resource(

@@ -6,16 +6,13 @@ import (
 	"strconv"
 
 	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
+	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/consts"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-)
-
-const (
-	defaultKey = "cf-tunnel-operator.walnuts.dev/default"
 )
 
 // log is for logging in this package.
@@ -47,7 +44,7 @@ func (d *CloudflareTunnelCustomDefaulter) Default(ctx context.Context, obj runti
 	if cloudflaretunnel.ObjectMeta.Labels == nil {
 		cloudflaretunnel.ObjectMeta.Labels = make(map[string]string)
 	}
-	cloudflaretunnel.ObjectMeta.Labels[defaultKey] = strconv.FormatBool(cloudflaretunnel.Spec.Default)
+	cloudflaretunnel.ObjectMeta.Labels[consts.DefaultLabelKey] = strconv.FormatBool(cloudflaretunnel.Spec.Default)
 
 	return nil
 }
@@ -97,7 +94,7 @@ func (v *CloudflareTunnelCustomValidator) checkDefaultTunnel(ctx context.Context
 	var defaultCFTunnels cftv1beta1.CloudflareTunnelList
 	if err := v.List(ctx, &defaultCFTunnels, &client.ListOptions{
 		Limit:         1,
-		LabelSelector: labels.SelectorFromSet(map[string]string{defaultKey: "true"}),
+		LabelSelector: labels.SelectorFromSet(map[string]string{consts.DefaultLabelKey: "true"}),
 	}); err != nil {
 		return nil, err
 	}
