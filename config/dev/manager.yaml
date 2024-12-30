@@ -6,14 +6,14 @@ metadata:
 spec:
   template:
     spec:
-      securityContext: null
       containers:
-        - command:
-            - /manager
-          args:
-            - --leader-elect
-            - --health-probe-bind-address=:8081 
-            - --log-level=debug
-          name: manager
-          securityContext: null
-          resources: null
+      - command:
+        - /manager
+        args:
+        - --leader-elect
+        - --health-probe-bind-address=:8081 
+        - --log-level=debug
+        name: manager
+        envFrom:
+        - secretRef:
+            name: cloudflare-secrets

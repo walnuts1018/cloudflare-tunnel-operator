@@ -56,6 +56,20 @@ func (mr *MockCloudflareTunnelManagerMockRecorder) CreateTunnel(ctx, Name any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTunnel", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).CreateTunnel), ctx, Name)
 }
 
+// DeleteTunnel mocks base method.
+func (m *MockCloudflareTunnelManager) DeleteTunnel(ctx context.Context, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteTunnel", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteTunnel indicates an expected call of DeleteTunnel.
+func (mr *MockCloudflareTunnelManagerMockRecorder) DeleteTunnel(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTunnel", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).DeleteTunnel), ctx, id)
+}
+
 // GetTunnel mocks base method.
 func (m *MockCloudflareTunnelManager) GetTunnel(ctx context.Context, ID string) (domain.CloudflareTunnel, error) {
 	m.ctrl.T.Helper()

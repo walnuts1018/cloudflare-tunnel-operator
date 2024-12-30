@@ -1,2 +1,4 @@
+namespace: system
 resources:
 - manager.yaml
+- secret.yaml

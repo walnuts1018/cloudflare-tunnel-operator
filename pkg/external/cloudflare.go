@@ -50,6 +50,13 @@ func (c *CloudflareTunnelClient) CreateTunnel(ctx context.Context, name string) 
 	}, nil
 }
 
+func (c *CloudflareTunnelClient) DeleteTunnel(ctx context.Context, id string) error {
+	if err := c.client.DeleteTunnel(ctx, cloudflare.AccountIdentifier(c.accountId), id); err != nil {
+		return fmt.Errorf("failed to delete tunnel: %v", err)
+	}
+	return nil
+}
+
 func (c *CloudflareTunnelClient) GetTunnelToken(ctx context.Context, tunnelId string) (domain.CloudflareTunnelToken, error) {
 	t, err := c.client.GetTunnelToken(ctx, cloudflare.AccountIdentifier(c.accountId), tunnelId)
 	if err != nil {

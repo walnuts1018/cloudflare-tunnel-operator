@@ -16,13 +16,13 @@ var _ = Describe("Cloudflare", func() {
 		var client *CloudflareTunnelClient
 
 		BeforeEach(func() {
-			apiToken, ok := os.LookupEnv("CF_API_TOKEN")
+			apiToken, ok := os.LookupEnv("CLOUDFLARE_API_TOKEN")
 			if !ok {
-				Fail("CF_API_TOKEN is not set")
+				Fail("CLOUDFLARE_API_TOKEN is not set")
 			}
-			accountId, ok := os.LookupEnv("CF_ACCOUNT_ID")
+			accountId, ok := os.LookupEnv("CLOUDFLARE_ACCOUNT_ID")
 			if !ok {
-				Fail("CF_ACCOUNT_ID is not set")
+				Fail("CLOUDFLARE_ACCOUNT_ID is not set")
 			}
 
 			var err error

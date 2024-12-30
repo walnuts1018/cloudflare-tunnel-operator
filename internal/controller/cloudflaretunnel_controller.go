@@ -36,6 +36,7 @@ const (
 	managerName    = "cloudflare-tunnel-operator"
 	MetricsPort    = 60123
 	tunnelTokenKey = "cloudflared-tunnel-token"
+	finalizerName  = "cf-tunnel-operator.walnuts.dev/finalizer"
 )
 
 // CloudflareTunnelReconciler reconciles a CloudflareTunnel object
@@ -81,7 +82,26 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	if !cfTunnel.ObjectMeta.DeletionTimestamp.IsZero() {
+		if controllerutil.ContainsFinalizer(&cfTunnel, finalizerName) {
+			if err := r.CloudflareTunnelManager.DeleteTunnel(ctx, cfTunnel.Status.TunnelID); err != nil {
+				return ctrl.Result{}, fmt.Errorf("failed to delete Cloudflare Tunnel: %w", err)
+			}
+
+			controllerutil.RemoveFinalizer(&cfTunnel, finalizerName)
+			err = r.Update(ctx, &cfTunnel)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+		}
 		return ctrl.Result{}, nil
+	}
+
+	if !controllerutil.ContainsFinalizer(&cfTunnel, finalizerName) {
+		controllerutil.AddFinalizer(&cfTunnel, finalizerName)
+		err = r.Update(ctx, &cfTunnel)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	tunnel, token, err := r.reconcileTunnel(ctx, cfTunnel)

@@ -110,10 +110,6 @@ func (r *IngressReconciler) updateCloudflareTunnelConfig(ctx context.Context, cf
 		return fmt.Errorf("tunnel ID is empty: %w", ErrCloudflareTunnelNotFound)
 	}
 
-	
-
-
-
 	return nil
 }
 
