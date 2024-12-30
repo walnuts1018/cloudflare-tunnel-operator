@@ -80,38 +80,3 @@ jobs:
           config: cr.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-  SucceessNotification:
-    if: ${{ success() }}
-    name: Send Success Message
-    needs: [chart-release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Message to Slack
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_ICON: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-          SLACK_TITLE: cloudflare-tunnel-operator image build succeeded
-          SLACK_MESSAGE: |
-            Image: cloudflare-tunnel-operator
-            Run number : #${{ github.run_number }}
-
-  FailureAlert:
-    if: ${{ failure() }}
-    name: Notify failure
-    needs: [chart-release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Failure Alert to Slack
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_ICON: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-          SLACK_TITLE: cloudflare-tunnel-operator image build failed
-          SLACK_COLOR: danger
-          SLACK_MESSAGE: |
-            Image: cloudflare-tunnel-operator
-            Run number : #${{ github.run_number }}

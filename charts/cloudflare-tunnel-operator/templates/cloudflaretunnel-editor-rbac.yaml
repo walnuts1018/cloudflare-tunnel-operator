@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "cloudflare-tunnel-operator.fullname" . }}-cloudflaretunnel-editor-role
+  labels:
+  {{- include "cloudflare-tunnel-operator.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - cf-tunnel-operator.walnuts.dev
+  resources:
+  - cloudflaretunnels
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - cf-tunnel-operator.walnuts.dev
+  resources:
+  - cloudflaretunnels/status
+  verbs:
+  - get

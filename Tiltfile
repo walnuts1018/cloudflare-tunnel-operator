@@ -18,6 +18,9 @@ def generate():
 def binary():
     return 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/manager cmd/main.go;'
 
+def ingress_nginx():
+    return 'kubectl apply -f https://kind.sigs.k8s.io/examples/ingress/deploy-ingress-nginx.yaml;'
+
 # Generate manifests and go files
 local_resource('make manifests', manifests(), deps=["api", "internal", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
 local_resource('make generate', go_generate() + generate(), deps=["api", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
@@ -44,6 +47,8 @@ docker_build_with_restart(
         sync('./bin/manager', '/manager'),
     ]
 )
+
+local_resource('Sample Dependencies', ingress_nginx())
 
 local_resource(
     'Sample', 'kustomize build ./config/samples | kubectl apply -f -',

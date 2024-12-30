@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "properties": {
+    "cloudflareToken": {
+      "type": "object",
+      "properties": {
+        "cloudflareAccountID": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cloudflareAPIToken": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "cloudflareAccountID",
+        "cloudflareAPIToken"
+      ]
+    }
+  },
+  "title": "Values",
+  "type": "object"
+}

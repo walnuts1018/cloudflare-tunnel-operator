@@ -138,6 +138,7 @@ const (
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="REPLICAS",type="string",JSONPath=".spec.replicas",description="Replica Count"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="DEFAULT",type="boolean",JSONPath=".spec.default",description="Default Tunnel"
 
 // CloudflareTunnel is the Schema for the cloudflaretunnels API.
 type CloudflareTunnel struct {

@@ -1,0 +1,8 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "cloudflare-tunnel-operator.fullname" . }}-selfsigned-issuer
+  labels:
+  {{- include "cloudflare-tunnel-operator.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}

@@ -7,3 +7,4 @@ metadata:
   name: cloudflaretunnel-sample
 spec:
   replicas: 2
+  default: true
