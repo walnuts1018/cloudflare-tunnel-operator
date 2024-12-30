@@ -2,6 +2,7 @@ package controller
 
 import (
 	"reflect"
+	"slices"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -24,10 +25,9 @@ func Test_getHosts(t *testing.T) {
 		ingress networkingv1.Ingress
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    []host
-		wantErr bool
+		name string
+		args args
+		want []host
 	}{
 		{
 			name: "normal",
@@ -66,16 +66,11 @@ func Test_getHosts(t *testing.T) {
 					TLS:  false,
 				},
 			},
-			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := getHosts(tt.args.ingress)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("getHosts() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			got := slices.Collect(getHosts(tt.args.ingress))
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getHosts() = %v, want %v", got, tt.want)
 			}

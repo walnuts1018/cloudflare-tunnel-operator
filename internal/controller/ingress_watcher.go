@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"iter"
 	"maps"
 	"net/netip"
 	"slices"
@@ -87,12 +88,7 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, fmt.Errorf("failed to parse IP: %w", err)
 	}
 
-	hosts, err := getHosts(*ingress)
-	if err != nil {
-		return ctrl.Result{}, fmt.Errorf("failed to get hosts: %w", err)
-	}
-
-	for _, host := range hosts {
+	for host := range getHosts(*ingress) {
 		if err := r.updateCloudflareTunnelConfig(ctx, tunnelID, host, ip, cfTunnel.Spec.Settings); err != nil {
 			return ctrl.Result{}, fmt.Errorf("failed to update Cloudflare Tunnel config: %w", err)
 		}
@@ -188,34 +184,31 @@ type host struct {
 	TLS  bool
 }
 
-func getHosts(ingress networkingv1.Ingress) ([]host, error) {
-	hosts := make([]host, 0, len(ingress.Spec.Rules))
+func getHosts(ingress networkingv1.Ingress) iter.Seq[host] {
 	var TLSHosts []string
-
 	for _, tls := range ingress.Spec.TLS {
 		TLSHosts = append(TLSHosts, tls.Hosts...)
 	}
 
-	for _, rule := range ingress.Spec.Rules {
-		hosts = append(hosts,
-			func(hostname string) host {
-				for _, tlshost := range TLSHosts {
-					if hostname == tlshost {
-						return host{
-							Host: hostname,
-							TLS:  true,
-						}
-					}
-				}
-				return host{
-					Host: hostname,
-					TLS:  false,
-				}
-			}(rule.Host),
-		)
+	return func(yield func(host) bool) {
+		for _, rule := range ingress.Spec.Rules {
+			if !yield(host{
+				Host: rule.Host,
+				TLS:  checkTLS(rule.Host, TLSHosts),
+			}) {
+				break
+			}
+		}
 	}
+}
 
-	return hosts, nil
+func checkTLS(host string, TLSHosts []string) bool {
+	for _, tlshost := range TLSHosts {
+		if host == tlshost {
+			return true
+		}
+	}
+	return false
 }
 
 func detectCloudflareTunnelName(annotations map[string]string) (types.NamespacedName, error) {

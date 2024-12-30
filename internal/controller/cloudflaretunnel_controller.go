@@ -174,7 +174,7 @@ func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunn
 			return domain.CloudflareTunnel{
 				ID:   cfTunnel.Status.TunnelID,
 				Name: cfTunnel.Name,
-			}, domain.CloudflareTunnelToken(token), nil
+			}, token, nil
 		} else {
 			token, err := r.CloudflareTunnelManager.GetTunnelToken(ctx, cfTunnel.Status.TunnelID)
 			if err == nil {
