@@ -40,12 +40,12 @@ spec:
         env:
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
-        - name: CLOUDFLARE_API_TOKEN
+        - name: CLOUDFLARE_ACCOUNT_ID
           valueFrom:
             secretKeyRef:
               name: {{ include "cloudflare-tunnel-operator.token-secret.name" . }}
               key: cloudflareAccountID
-        - name: CLOUDFLARE_ACCOUNT_ID
+        - name: CLOUDFLARE_API_TOKEN
           valueFrom:
             secretKeyRef:
               name: {{ include "cloudflare-tunnel-operator.token-secret.name" . }}
