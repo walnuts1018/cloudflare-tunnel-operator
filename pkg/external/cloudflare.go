@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	cloudflare "github.com/cloudflare/cloudflare-go"
-	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/utils/random"
 )
@@ -57,8 +56,8 @@ func (c *CloudflareTunnelClient) DeleteTunnel(ctx context.Context, id string) er
 	return nil
 }
 
-func (c *CloudflareTunnelClient) GetTunnelToken(ctx context.Context, tunnelId string) (domain.CloudflareTunnelToken, error) {
-	t, err := c.client.GetTunnelToken(ctx, cloudflare.AccountIdentifier(c.accountId), tunnelId)
+func (c *CloudflareTunnelClient) GetTunnelToken(ctx context.Context, tunnelID string) (domain.CloudflareTunnelToken, error) {
+	t, err := c.client.GetTunnelToken(ctx, cloudflare.AccountIdentifier(c.accountId), tunnelID)
 	if err != nil {
 		return "", fmt.Errorf("failed to get tunnel token: %v", err)
 	}
@@ -77,10 +76,25 @@ func (c *CloudflareTunnelClient) GetTunnel(ctx context.Context, id string) (doma
 	}, nil
 }
 
-func (c *CloudflareTunnelClient) DeleteToken(ctx context.Context, tunnelId string) error {
+func (c *CloudflareTunnelClient) DeleteToken(ctx context.Context, tunnelID string) error {
 	return nil
 }
 
-func (c *CloudflareTunnelClient) AddPublicHost(ctx context.Context, tunnelId string, host string, tunnelSettings cftv1beta1.CloudflareTunnelSettings) error {
+func (c *CloudflareTunnelClient) GetTunnelConfiguration(ctx context.Context, tunnelID string) (domain.TunnelConfiguration, error) {
+	result, err := c.client.GetTunnelConfiguration(ctx, cloudflare.AccountIdentifier(c.accountId), tunnelID)
+	if err != nil {
+		return domain.TunnelConfiguration{}, fmt.Errorf("failed to get tunnel configs: %v", err)
+	}
+	return domain.TunnelConfiguration(result.Config), nil
+}
+
+func (c *CloudflareTunnelClient) UpdateTunnelConfiguration(ctx context.Context, tunnelID string, config domain.TunnelConfiguration) error {
+	_, err := c.client.UpdateTunnelConfiguration(ctx, cloudflare.AccountIdentifier(c.accountId), cloudflare.TunnelConfigurationParams{
+		TunnelID: tunnelID,
+		Config:   cloudflare.TunnelConfiguration(config),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update tunnel configs: %v", err)
+	}
 	return nil
 }

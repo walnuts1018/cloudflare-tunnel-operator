@@ -4,10 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
+	"net/netip"
+	"slices"
 	"strings"
+	"sync"
 
+	"github.com/cloudflare/cloudflare-go"
 	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/consts"
+	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
 	networkingv1 "k8s.io/api/networking/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
@@ -24,7 +30,7 @@ const (
 )
 
 var (
-	ErrCloudflareTunnelNotFound = errors.New("Cloudflare Tunnel not found")
+	ErrCloudflareTunnelNotFound = errors.New("cloudflare tunnel not found")
 )
 
 // IngressReconciler reconciles a Ingress object
@@ -32,6 +38,7 @@ type IngressReconciler struct {
 	client.Client
 	Scheme                  *runtime.Scheme
 	CloudflareTunnelManager CloudflareTunnelManager
+	mu                      sync.Mutex
 }
 
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch
@@ -66,8 +73,29 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, fmt.Errorf("cloudflare tunnel is being deleted: %w", ErrCloudflareTunnelNotFound)
 	}
 
-	if err := r.updateCloudflareTunnelConfig(ctx, cfTunnel, *ingress); err != nil {
-		return ctrl.Result{}, fmt.Errorf("failed to update Cloudflare Tunnel config: %w", err)
+	tunnelID := cfTunnel.Status.TunnelID
+	if tunnelID == "" {
+		return ctrl.Result{}, fmt.Errorf("tunnel ID is empty")
+	}
+
+	if len(ingress.Status.LoadBalancer.Ingress) == 0 {
+		return ctrl.Result{}, fmt.Errorf("ingress status load balancer ingress is empty")
+	}
+
+	ip, err := netip.ParseAddr(ingress.Status.LoadBalancer.Ingress[0].IP)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to parse IP: %w", err)
+	}
+
+	hosts, err := getHosts(*ingress)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed to get hosts: %w", err)
+	}
+
+	for _, host := range hosts {
+		if err := r.updateCloudflareTunnelConfig(ctx, tunnelID, host, ip, cfTunnel.Spec.Settings); err != nil {
+			return ctrl.Result{}, fmt.Errorf("failed to update Cloudflare Tunnel config: %w", err)
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -104,13 +132,90 @@ func (r *IngressReconciler) getCloudflareTunnel(ctx context.Context, cfTunnelNam
 	return cfTunnel, nil
 }
 
-func (r *IngressReconciler) updateCloudflareTunnelConfig(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel, ingress networkingv1.Ingress) error {
-	tunnelID := cfTunnel.Status.TunnelID
-	if tunnelID == "" {
-		return fmt.Errorf("tunnel ID is empty: %w", ErrCloudflareTunnelNotFound)
+func (r *IngressReconciler) updateCloudflareTunnelConfig(
+	ctx context.Context,
+	tunnelID string,
+	host host,
+	IP netip.Addr,
+	tunnelSettings cftv1beta1.CloudflareTunnelSettings,
+) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	config, err := r.CloudflareTunnelManager.GetTunnelConfiguration(ctx, tunnelID)
+	if err != nil {
+		return fmt.Errorf("failed to get tunnel configs: %v", err)
+	}
+	rules := make(map[string]cloudflare.UnvalidatedIngressRule, len(config.Ingress))
+	for _, rule := range config.Ingress {
+		rules[rule.Hostname] = rule
+	}
+
+	rules[host.Host] = cloudflare.UnvalidatedIngressRule{
+		Hostname:      host.Host,
+		Service:       createEndpoint(IP, host.TLS),
+		OriginRequest: domain.ToOriginRequestConfig(tunnelSettings),
+	}
+
+	config.Ingress = slices.SortedFunc(maps.Values(rules), func(a, b cloudflare.UnvalidatedIngressRule) int {
+		switch {
+		case a.Hostname == "":
+			return -1
+		case b.Hostname == "":
+			return 1
+		default:
+			return strings.Compare(a.Hostname, b.Hostname)
+		}
+	})
+
+	if err := r.CloudflareTunnelManager.UpdateTunnelConfiguration(ctx, tunnelID, config); err != nil {
+		return fmt.Errorf("failed to update tunnel configs: %v", err)
 	}
 
 	return nil
+}
+
+func createEndpoint(IP netip.Addr, TLS bool) string {
+	if TLS {
+		return "https://" + IP.String() + ":443"
+	} else {
+		return "http://" + IP.String() + ":80"
+	}
+}
+
+type host struct {
+	Host string
+	TLS  bool
+}
+
+func getHosts(ingress networkingv1.Ingress) ([]host, error) {
+	hosts := make([]host, 0, len(ingress.Spec.Rules))
+	var TLSHosts []string
+
+	for _, tls := range ingress.Spec.TLS {
+		TLSHosts = append(TLSHosts, tls.Hosts...)
+	}
+
+	for _, rule := range ingress.Spec.Rules {
+		hosts = append(hosts,
+			func(hostname string) host {
+				for _, tlshost := range TLSHosts {
+					if hostname == tlshost {
+						return host{
+							Host: hostname,
+							TLS:  true,
+						}
+					}
+				}
+				return host{
+					Host: hostname,
+					TLS:  false,
+				}
+			}(rule.Host),
+		)
+	}
+
+	return hosts, nil
 }
 
 func detectCloudflareTunnelName(annotations map[string]string) (types.NamespacedName, error) {

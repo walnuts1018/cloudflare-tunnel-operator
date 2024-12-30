@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestString(t *testing.T) {
+func TestString_Crypto(t *testing.T) {
 	type args struct {
 		length uint
 		base   string
@@ -48,7 +48,7 @@ func TestString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := New()
+			r := NewSecure()
 
 			got, err := r.String(tt.args.length, tt.args.base)
 			if (err != nil) != tt.wantErr {

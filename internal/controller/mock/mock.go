@@ -85,17 +85,46 @@ func (mr *MockCloudflareTunnelManagerMockRecorder) GetTunnel(ctx, ID any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTunnel", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).GetTunnel), ctx, ID)
 }
 
-// GetTunnelToken mocks base method.
-func (m *MockCloudflareTunnelManager) GetTunnelToken(ctx context.Context, tunnelId string) (domain.CloudflareTunnelToken, error) {
+// GetTunnelConfiguration mocks base method.
+func (m *MockCloudflareTunnelManager) GetTunnelConfiguration(ctx context.Context, tunnelID string) (domain.TunnelConfiguration, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTunnelToken", ctx, tunnelId)
+	ret := m.ctrl.Call(m, "GetTunnelConfiguration", ctx, tunnelID)
+	ret0, _ := ret[0].(domain.TunnelConfiguration)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTunnelConfiguration indicates an expected call of GetTunnelConfiguration.
+func (mr *MockCloudflareTunnelManagerMockRecorder) GetTunnelConfiguration(ctx, tunnelID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTunnelConfiguration", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).GetTunnelConfiguration), ctx, tunnelID)
+}
+
+// GetTunnelToken mocks base method.
+func (m *MockCloudflareTunnelManager) GetTunnelToken(ctx context.Context, tunnelID string) (domain.CloudflareTunnelToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTunnelToken", ctx, tunnelID)
 	ret0, _ := ret[0].(domain.CloudflareTunnelToken)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTunnelToken indicates an expected call of GetTunnelToken.
-func (mr *MockCloudflareTunnelManagerMockRecorder) GetTunnelToken(ctx, tunnelId any) *gomock.Call {
+func (mr *MockCloudflareTunnelManagerMockRecorder) GetTunnelToken(ctx, tunnelID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTunnelToken", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).GetTunnelToken), ctx, tunnelId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTunnelToken", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).GetTunnelToken), ctx, tunnelID)
+}
+
+// UpdateTunnelConfiguration mocks base method.
+func (m *MockCloudflareTunnelManager) UpdateTunnelConfiguration(ctx context.Context, tunnelID string, config domain.TunnelConfiguration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTunnelConfiguration", ctx, tunnelID, config)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateTunnelConfiguration indicates an expected call of UpdateTunnelConfiguration.
+func (mr *MockCloudflareTunnelManagerMockRecorder) UpdateTunnelConfiguration(ctx, tunnelID, config any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTunnelConfiguration", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).UpdateTunnelConfiguration), ctx, tunnelID, config)
 }
