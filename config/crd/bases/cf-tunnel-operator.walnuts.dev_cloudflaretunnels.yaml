@@ -718,7 +718,7 @@ spec:
                       are running a WSGI server.
                     type: boolean
                   http2Origin:
-                    default: true
+                    default: false
                     description: Attempt to connect to origin using HTTP2. Origin
                       must be configured as https.
                     type: boolean

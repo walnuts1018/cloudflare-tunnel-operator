@@ -77,7 +77,7 @@ type CloudflareTunnelSettings struct {
 	TLSTimeoutSeconds int32 `json:"tlsTimeoutSeconds,omitempty"`
 
 	// Attempt to connect to origin using HTTP2. Origin must be configured as https.
-	// +kubebuilder:default=true
+	// +kubebuilder:default=false
 	// +optional
 	HTTP2Origin bool `json:"http2Origin,omitempty"`
 
