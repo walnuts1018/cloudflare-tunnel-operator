@@ -22,18 +22,6 @@
       "required": [
         "cloudflareAccountID",
         "cloudflareZoneID"
-      ],
-      "oneOf": [
-        {
-          "required": [
-            "cloudflareAPIToken"
-          ]
-        },
-        {
-          "required": [
-            "existingSecret"
-          ]
-        }
       ]
     }
   },
