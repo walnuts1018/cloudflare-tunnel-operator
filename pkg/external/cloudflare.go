@@ -108,6 +108,7 @@ func (c *CloudflareTunnelClient) AddDNS(ctx context.Context, tunnelID string, ho
 		Proxied: ptr.To(true),
 		Type:    "CNAME",
 		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
+		Tags:    []string{"cloudflare-tunnel-operator"},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update tunnel configs: %v", err)
@@ -138,6 +139,7 @@ func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string,
 		TTL:     1, // auto
 		Proxied: ptr.To(true),
 		Type:    "CNAME",
+		Tags:    []string{"cloudflare-tunnel-operator"},
 		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
 	})
 	if err != nil {
