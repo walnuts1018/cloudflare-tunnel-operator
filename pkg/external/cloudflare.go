@@ -2,6 +2,7 @@ package external
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	cloudflare "github.com/cloudflare/cloudflare-go"
@@ -102,15 +103,19 @@ func (c *CloudflareTunnelClient) UpdateTunnelConfiguration(ctx context.Context, 
 }
 
 func (c *CloudflareTunnelClient) AddDNS(ctx context.Context, tunnelID string, hostname string) error {
-	_, err := c.client.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.CreateDNSRecordParams{
+	comment, err := json.Marshal(map[string]string{"managed-by": "cloudflare-tunnel-operator", "tunnelID": tunnelID})
+	if err != nil {
+		return fmt.Errorf("failed to update tunnel configs: %v", err)
+	}
+
+	if _, err := c.client.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.CreateDNSRecordParams{
 		Name:    hostname,
 		TTL:     1, // auto
 		Proxied: ptr.To(true),
 		Type:    "CNAME",
 		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
-		Tags:    []string{"cloudflare-tunnel-operator"},
-	})
-	if err != nil {
+		Comment: string(comment),
+	}); err != nil {
 		return fmt.Errorf("failed to update tunnel configs: %v", err)
 	}
 	return nil
@@ -134,16 +139,20 @@ func (c *CloudflareTunnelClient) GetDNS(ctx context.Context, tunnelID string, ho
 }
 
 func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string, hostname string, current domain.DNSRecord) error {
-	_, err := c.client.UpdateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.UpdateDNSRecordParams{
+	comment, err := json.Marshal(map[string]string{"managed-by": "cloudflare-tunnel-operator", "tunnelID": tunnelID})
+	if err != nil {
+		return fmt.Errorf("failed to update tunnel configs: %v", err)
+	}
+
+	if _, err := c.client.UpdateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.UpdateDNSRecordParams{
 		ID:      current.ID,
 		Name:    hostname,
 		TTL:     1, // auto
 		Proxied: ptr.To(true),
 		Type:    "CNAME",
-		Tags:    []string{"cloudflare-tunnel-operator"},
+		Comment: ptr.To(string(comment)),
 		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
-	})
-	if err != nil {
+	}); err != nil {
 		return fmt.Errorf("failed to update tunnel configs: %v", err)
 	}
 	return nil
