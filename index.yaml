@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   cloudflare-tunnel-operator:
   - apiVersion: v2
+    appVersion: 0.0.8
+    created: "2024-12-31T17:58:13.406644352Z"
+    description: A Helm chart for Kubernetes
+    digest: 4603402294e1b17acaa5070dddebb8a577fefb3d4849f55ff9645ea669655f7a
+    name: cloudflare-tunnel-operator
+    type: application
+    urls:
+    - https://github.com/walnuts1018/cloudflare-tunnel-operator/releases/download/cloudflare-tunnel-operator-chart-0.0.8/cloudflare-tunnel-operator-0.0.8.tgz
+    version: 0.0.8
+  - apiVersion: v2
     appVersion: 0.0.6
     created: "2024-12-31T07:14:25.794382798Z"
     description: A Helm chart for Kubernetes
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/walnuts1018/cloudflare-tunnel-operator/releases/download/cloudflare-tunnel-operator-chart-0.0.5/cloudflare-tunnel-operator-0.0.5.tgz
     version: 0.0.5
-generated: "2024-12-31T07:14:25.794391564Z"
+generated: "2024-12-31T17:58:13.406656254Z"
