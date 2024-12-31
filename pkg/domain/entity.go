@@ -18,5 +18,5 @@ type TunnelConfiguration cloudflare.TunnelConfiguration
 type DNSRecord cloudflare.DNSRecord
 
 func (d DNSRecord) Healthy(tunnelID string) bool {
-	return d.ID != "" && d.Type == "CNAME" && d.Content == fmt.Sprintf("%v.cfargotunnel.com", tunnelID)
+	return d.ID != "" && d.Type == "CNAME" && *d.Proxied && d.Content == fmt.Sprintf("%v.cfargotunnel.com", tunnelID)
 }

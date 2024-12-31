@@ -123,9 +123,8 @@ func (c *CloudflareTunnelClient) AddDNS(ctx context.Context, tunnelID string, ho
 
 func (c *CloudflareTunnelClient) GetDNS(ctx context.Context, tunnelID string, hostname string) (domain.DNSRecord, error) {
 	records, _, err := c.client.ListDNSRecords(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.ListDNSRecordsParams{
-		Name:    hostname,
-		Proxied: ptr.To(true),
-		Type:    "CNAME",
+		Name: hostname,
+		Type: "CNAME",
 	})
 	if err != nil {
 		return domain.DNSRecord{}, fmt.Errorf("failed to update tunnel configs: %v", err)
