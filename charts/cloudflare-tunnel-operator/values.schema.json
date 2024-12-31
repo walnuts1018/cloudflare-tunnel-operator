@@ -4,11 +4,13 @@
     "cloudflareToken": {
       "type": "object",
       "properties": {
-        "cloudflareAccountID": {
-          "type": "string",
-          "minLength": 1
+        "existingSecret": {
+          "type": "string"
         },
         "cloudflareAPIToken": {
+          "type": "string"
+        },
+        "cloudflareAccountID": {
           "type": "string",
           "minLength": 1
         },
@@ -19,8 +21,19 @@
       },
       "required": [
         "cloudflareAccountID",
-        "cloudflareAPIToken",
         "cloudflareZoneID"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "cloudflareAPIToken"
+          ]
+        },
+        {
+          "required": [
+            "existingSecret"
+          ]
+        }
       ]
     }
   },
