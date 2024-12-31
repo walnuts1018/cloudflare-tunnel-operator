@@ -159,17 +159,17 @@ func (mr *MockCloudflareTunnelManagerMockRecorder) GetTunnelToken(ctx, tunnelID 
 }
 
 // UpdateDNS mocks base method.
-func (m *MockCloudflareTunnelManager) UpdateDNS(ctx context.Context, tunnelID, hostname string) error {
+func (m *MockCloudflareTunnelManager) UpdateDNS(ctx context.Context, tunnelID, hostname string, current domain.DNSRecord) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateDNS", ctx, tunnelID, hostname)
+	ret := m.ctrl.Call(m, "UpdateDNS", ctx, tunnelID, hostname, current)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateDNS indicates an expected call of UpdateDNS.
-func (mr *MockCloudflareTunnelManagerMockRecorder) UpdateDNS(ctx, tunnelID, hostname any) *gomock.Call {
+func (mr *MockCloudflareTunnelManagerMockRecorder) UpdateDNS(ctx, tunnelID, hostname, current any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDNS", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).UpdateDNS), ctx, tunnelID, hostname)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDNS", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).UpdateDNS), ctx, tunnelID, hostname, current)
 }
 
 // UpdateTunnelConfiguration mocks base method.
