@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestString_Crypto(t *testing.T) {
+func Test_random_SecureString(t *testing.T) {
 	type args struct {
 		length uint
 		base   string
@@ -50,13 +50,13 @@ func TestString_Crypto(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			r := NewSecure()
 
-			got, err := r.String(tt.args.length, tt.args.base)
+			got, err := r.SecureString(tt.args.length, tt.args.base)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("String() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("SecureString() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if len(got) != int(tt.want.length) {
-				t.Errorf("String() = %v, want length %v", got, tt.want.length)
+				t.Errorf("SecureString() = %v, want length %v", got, tt.want.length)
 			}
 
 			if tt.want.f != nil {

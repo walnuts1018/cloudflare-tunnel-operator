@@ -1,6 +1,6 @@
 {
   "name": "Kubebuilder DevContainer",
-  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:7f15aa6f6a668b7da85a06cec14be04c7db9e457-12",
+  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:1503bc5a9a9a73cc42e2176759eb3246812d18da-20",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/git:1": {}

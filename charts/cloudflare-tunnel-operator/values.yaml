@@ -1,7 +1,8 @@
 cloudflareToken:
   existingSecret: ""
-  cloudflareAccountID: "test"
-  cloudflareAPIToken: "test"
+  cloudflareAccountID: ""
+  cloudflareZoneID: ""
+  cloudflareAPIToken: ""
 
 controllerManager:
   manager:

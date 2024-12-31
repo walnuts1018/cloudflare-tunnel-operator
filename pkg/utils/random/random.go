@@ -15,16 +15,26 @@ const Alphanumeric = Alphabets + Numbers
 const AlphanumericSymbols = Alphanumeric + Symbols
 
 type Random interface {
-	String(length uint, base string) (string, error)
+	InsecureString(length uint, base string) string
+	SecureString(length uint, base string) (string, error)
 }
 
-type secure struct{}
+type random struct{}
 
 func NewSecure() Random {
-	return secure{}
+	return random{}
 }
 
-func (r secure) String(length uint, base string) (string, error) {
+func (r random) InsecureString(length uint, base string) string {
+	runes := []rune(base)
+	result := make([]rune, length)
+	for i := range result {
+		result[i] = runes[mathrand.IntN(len(runes))]
+	}
+	return string(result)
+}
+
+func (r random) SecureString(length uint, base string) (string, error) {
 	b := make([]byte, length)
 	if _, err := rand.Read(b); err != nil {
 		return "", fmt.Errorf("failed to read random: %w", err)
@@ -37,39 +47,16 @@ func (r secure) String(length uint, base string) (string, error) {
 	return result, nil
 }
 
-func (r secure) Byte(length int) ([]byte, error) {
-	b := make([]byte, length)
-	if _, err := rand.Read(b); err != nil {
-		return nil, fmt.Errorf("failed to read random: %w", err)
-	}
-	return b, nil
-}
-
 type dummy struct{}
 
 func NewDummy() Random {
 	return dummy{}
 }
 
-func (d dummy) String(length uint, base string) (string, error) {
+func (d dummy) InsecureString(length uint, base string) string {
+	return "dummy"
+}
+
+func (d dummy) SecureString(length uint, base string) (string, error) {
 	return "dummy", nil
-}
-
-func (d dummy) Byte(length int) ([]byte, error) {
-	return []byte("dummy"), nil
-}
-
-type insecure struct{}
-
-func NewInsecure() Random {
-	return insecure{}
-}
-
-func (r insecure) String(length uint, base string) (string, error) {
-	runes := []rune(base)
-	result := make([]rune, length)
-	for i := range result {
-		result[i] = runes[mathrand.IntN(len(runes))]
-	}
-	return string(result), nil
 }

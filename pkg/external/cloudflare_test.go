@@ -25,8 +25,13 @@ var _ = Describe("Cloudflare", func() {
 				Fail("CLOUDFLARE_ACCOUNT_ID is not set")
 			}
 
+			zoneID, ok := os.LookupEnv("CLOUDFLARE_ZONE_ID")
+			if !ok {
+				Fail("CLOUDFLARE_ZONE_ID is not set")
+			}
+
 			var err error
-			client, err = NewCloudflareTunnelClient(apiToken, accountId, random.NewDummy())
+			client, err = NewCloudflareTunnelClient(apiToken, accountId, zoneID, random.NewDummy())
 			Expect(err).NotTo(HaveOccurred())
 		})
 

@@ -20,4 +20,8 @@ type CloudflareTunnelManager interface {
 	GetTunnelToken(ctx context.Context, tunnelID string) (domain.CloudflareTunnelToken, error)
 	GetTunnelConfiguration(ctx context.Context, tunnelID string) (domain.TunnelConfiguration, error)
 	UpdateTunnelConfiguration(ctx context.Context, tunnelID string, config domain.TunnelConfiguration) error
+	AddDNS(ctx context.Context, tunnelID string, hostname string) error
+	GetDNS(ctx context.Context, tunnelID string, hostname string) (domain.DNSRecord, error)
+	UpdateDNS(ctx context.Context, tunnelID string, hostname string) error
+	DeleteDNS(ctx context.Context, tunnelID string, record domain.DNSRecord) error
 }

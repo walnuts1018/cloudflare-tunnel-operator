@@ -47,6 +47,7 @@ func init() {
 type Config struct {
 	CloudflareAPIToken  string `env:"CLOUDFLARE_API_TOKEN,required"`
 	CloudflareAccountID string `env:"CLOUDFLARE_ACCOUNT_ID,required"`
+	CloudflareZoneID    string `env:"CLOUDFLARE_ZONE_ID,required"`
 }
 
 func main() {
@@ -157,7 +158,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfManager, err := external.NewCloudflareTunnelClient(cfg.CloudflareAPIToken, cfg.CloudflareAccountID, random.NewSecure())
+	cfManager, err := external.NewCloudflareTunnelClient(cfg.CloudflareAPIToken, cfg.CloudflareAccountID, cfg.CloudflareZoneID, random.NewSecure())
 	if err != nil {
 		setupLog.Error(err, "unable to create Cloudflare Tunnel client")
 		os.Exit(1)

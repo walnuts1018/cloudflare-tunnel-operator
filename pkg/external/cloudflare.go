@@ -7,16 +7,17 @@ import (
 	cloudflare "github.com/cloudflare/cloudflare-go"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/utils/random"
+	"k8s.io/utils/ptr"
 )
 
 type CloudflareTunnelClient struct {
 	client    *cloudflare.API
 	accountId string
-
-	random random.Random
+	zoneID    string
+	random    random.Random
 }
 
-func NewCloudflareTunnelClient(apiToken string, accountId string, random random.Random) (*CloudflareTunnelClient, error) {
+func NewCloudflareTunnelClient(apiToken string, accountId string, zoneID string, random random.Random) (*CloudflareTunnelClient, error) {
 	client, err := cloudflare.NewWithAPIToken(apiToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize cloudflare provider: %v", err)
@@ -24,12 +25,13 @@ func NewCloudflareTunnelClient(apiToken string, accountId string, random random.
 	return &CloudflareTunnelClient{
 		client:    client,
 		accountId: accountId,
+		zoneID:    zoneID,
 		random:    random,
 	}, nil
 }
 
 func (c *CloudflareTunnelClient) CreateTunnel(ctx context.Context, name string) (domain.CloudflareTunnel, error) {
-	secret, err := c.random.String(32, random.Alphanumeric)
+	secret, err := c.random.SecureString(32, random.Alphanumeric)
 	if err != nil {
 		return domain.CloudflareTunnel{}, fmt.Errorf("failed to generate secret: %v", err)
 	}
@@ -94,6 +96,58 @@ func (c *CloudflareTunnelClient) UpdateTunnelConfiguration(ctx context.Context, 
 		Config:   cloudflare.TunnelConfiguration(config),
 	})
 	if err != nil {
+		return fmt.Errorf("failed to update tunnel configs: %v", err)
+	}
+	return nil
+}
+
+func (c *CloudflareTunnelClient) AddDNS(ctx context.Context, tunnelID string, hostname string) error {
+	_, err := c.client.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.CreateDNSRecordParams{
+		Name:    hostname,
+		TTL:     1, // auto
+		Proxied: ptr.To(true),
+		Type:    "CNAME",
+		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update tunnel configs: %v", err)
+	}
+	return nil
+}
+
+func (c *CloudflareTunnelClient) GetDNS(ctx context.Context, tunnelID string, hostname string) (domain.DNSRecord, error) {
+	records, _, err := c.client.ListDNSRecords(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.ListDNSRecordsParams{
+		Name:    hostname,
+		Proxied: ptr.To(true),
+		Type:    "CNAME",
+	})
+	if err != nil {
+		return domain.DNSRecord{}, fmt.Errorf("failed to update tunnel configs: %v", err)
+	}
+
+	if len(records) == 0 {
+		return domain.DNSRecord{}, nil
+	}
+
+	return domain.DNSRecord(records[0]), nil
+}
+
+func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string, hostname string) error {
+	_, err := c.client.UpdateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.UpdateDNSRecordParams{
+		Name:    hostname,
+		TTL:     1, // auto
+		Proxied: ptr.To(true),
+		Type:    "CNAME",
+		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update tunnel configs: %v", err)
+	}
+	return nil
+}
+
+func (c *CloudflareTunnelClient) DeleteDNS(ctx context.Context, tunnelID string, record domain.DNSRecord) error {
+	if err := c.client.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), record.ID); err != nil {
 		return fmt.Errorf("failed to update tunnel configs: %v", err)
 	}
 	return nil

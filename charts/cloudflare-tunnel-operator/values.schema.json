@@ -11,11 +11,16 @@
         "cloudflareAPIToken": {
           "type": "string",
           "minLength": 1
+        },
+        "cloudflareZoneID": {
+          "type": "string",
+          "minLength": 1
         }
       },
       "required": [
         "cloudflareAccountID",
-        "cloudflareAPIToken"
+        "cloudflareAPIToken",
+        "cloudflareZoneID"
       ]
     }
   },

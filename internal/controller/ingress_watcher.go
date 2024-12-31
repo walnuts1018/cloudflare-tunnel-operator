@@ -97,6 +97,10 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		if err := r.updateCloudflareTunnelConfig(ctx, tunnelID, host, ip, cfTunnel.Spec.Settings); err != nil {
 			return ctrl.Result{}, fmt.Errorf("failed to update Cloudflare Tunnel config: %w", err)
 		}
+
+		if err := r.updateDNSRecord(ctx, tunnelID, host); err != nil {
+			return ctrl.Result{}, fmt.Errorf("failed to update Cloudflare DNS Record: %w", err)
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -186,6 +190,28 @@ func (r *IngressReconciler) updateCloudflareTunnelConfig(
 		return fmt.Errorf("failed to update tunnel configs: %v", err)
 	}
 
+	return nil
+}
+
+func (r *IngressReconciler) updateDNSRecord(ctx context.Context, tunnelID string, host host) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	record, err := r.CloudflareTunnelManager.GetDNS(ctx, tunnelID, host.Host)
+	if err != nil {
+		return fmt.Errorf("failed to get DNS record: %v", err)
+	}
+
+	if record.ID == "" {
+		if err := r.CloudflareTunnelManager.AddDNS(ctx, tunnelID, host.Host); err != nil {
+			return fmt.Errorf("failed to add DNS record: %v", err)
+		}
+		return nil
+	} else if !record.Healthy(tunnelID) {
+		if err := r.CloudflareTunnelManager.UpdateDNS(ctx, tunnelID, host.Host); err != nil {
+			return fmt.Errorf("failed to update DNS record: %v", err)
+		}
+	}
 	return nil
 }
 
