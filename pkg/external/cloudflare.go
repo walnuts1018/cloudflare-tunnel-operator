@@ -133,8 +133,9 @@ func (c *CloudflareTunnelClient) GetDNS(ctx context.Context, tunnelID string, ho
 	return domain.DNSRecord(records[0]), nil
 }
 
-func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string, hostname string) error {
+func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string, hostname string, current domain.DNSRecord) error {
 	_, err := c.client.UpdateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.UpdateDNSRecordParams{
+		ID:      current.ID,
 		Name:    hostname,
 		TTL:     1, // auto
 		Proxied: ptr.To(true),

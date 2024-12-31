@@ -208,7 +208,7 @@ func (r *IngressReconciler) updateDNSRecord(ctx context.Context, tunnelID string
 		}
 		return nil
 	} else if !record.Healthy(tunnelID) {
-		if err := r.CloudflareTunnelManager.UpdateDNS(ctx, tunnelID, host.Host); err != nil {
+		if err := r.CloudflareTunnelManager.UpdateDNS(ctx, tunnelID, host.Host, record); err != nil {
 			return fmt.Errorf("failed to update DNS record: %v", err)
 		}
 	}
