@@ -31,7 +31,8 @@ const (
 )
 
 var (
-	ErrCloudflareTunnelNotFound = errors.New("cloudflare tunnel not found")
+	ErrCloudflareTunnelNotFound         = errors.New("cloudflare tunnel not found")
+	ErrDefaultCloudflareTunnelNotExists = errors.New("default cloudflare tunnel not exists")
 )
 
 // IngressReconciler reconciles a Ingress object
@@ -67,6 +68,10 @@ func (r *IngressReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	cfTunnel, err := r.getCloudflareTunnel(ctx, cfTunnelName)
 	if err != nil {
+		if errors.Is(err, ErrDefaultCloudflareTunnelNotExists) {
+			logger.Info("default Cloudflare Tunnel not exists")
+			return ctrl.Result{}, nil
+		}
 		return ctrl.Result{}, fmt.Errorf("failed to get Cloudflare Tunnel: %w", err)
 	}
 
@@ -111,7 +116,7 @@ func (r *IngressReconciler) getCloudflareTunnel(ctx context.Context, cfTunnelNam
 		}
 
 		if len(defaultCFTunnels.Items) == 0 {
-			return cftv1beta1.CloudflareTunnel{}, ErrCloudflareTunnelNotFound
+			return cftv1beta1.CloudflareTunnel{}, ErrDefaultCloudflareTunnelNotExists
 		}
 
 		cfTunnel = defaultCFTunnels.Items[0]
@@ -144,21 +149,34 @@ func (r *IngressReconciler) updateCloudflareTunnelConfig(
 	}
 	rules := make(map[string]cloudflare.UnvalidatedIngressRule, len(config.Ingress))
 	for _, rule := range config.Ingress {
-		rules[rule.Hostname] = rule
+		rules[rule.Hostname] = cloudflare.UnvalidatedIngressRule{
+			Hostname:      rule.Hostname,
+			Path:          rule.Path,
+			Service:       rule.Service,
+			OriginRequest: domain.ToOriginRequestConfig(tunnelSettings),
+		}
 	}
 
 	rules[host.Host] = cloudflare.UnvalidatedIngressRule{
 		Hostname:      host.Host,
+		Path:          "",
 		Service:       createEndpoint(IP, host.TLS),
 		OriginRequest: domain.ToOriginRequestConfig(tunnelSettings),
+	}
+
+	rules[""] = cloudflare.UnvalidatedIngressRule{
+		Hostname:      "",
+		Path:          "",
+		Service:       tunnelSettings.CatchAllRule,
+		OriginRequest: nil,
 	}
 
 	config.Ingress = slices.SortedFunc(maps.Values(rules), func(a, b cloudflare.UnvalidatedIngressRule) int {
 		switch {
 		case a.Hostname == "":
-			return -1
-		case b.Hostname == "":
 			return 1
+		case b.Hostname == "":
+			return -1
 		default:
 			return strings.Compare(a.Hostname, b.Hostname)
 		}
