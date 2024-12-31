@@ -7,6 +7,5 @@ patches:
 secretGenerator:
 - name: cloudflare-secrets
   namespace: system
-  behavior: replace
   envs:
   - .env
