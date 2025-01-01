@@ -48,6 +48,7 @@ type Config struct {
 	CloudflareAPIToken  string `env:"CLOUDFLARE_API_TOKEN,required"`
 	CloudflareAccountID string `env:"CLOUDFLARE_ACCOUNT_ID,required"`
 	CloudflareZoneID    string `env:"CLOUDFLARE_ZONE_ID,required"`
+	EnableWebhooks      bool   `env:"ENABLE_WEBHOOKS" envDefault:"true"`
 }
 
 func main() {
@@ -180,7 +181,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Ingress")
 		os.Exit(1)
 	}
-	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+	if cfg.EnableWebhooks {
 		if err = webhookcftunneloperatorv1beta1.SetupCloudflareTunnelWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "CloudflareTunnel")
 			os.Exit(1)
