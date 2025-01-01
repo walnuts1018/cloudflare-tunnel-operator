@@ -8,8 +8,9 @@ import (
 	"k8s.io/utils/ptr"
 )
 
-func ToOriginRequestConfig(tunnelSettings cftv1beta1.CloudflareTunnelSettings) *cloudflare.OriginRequestConfig {
+func ToOriginRequestConfig(tunnelSettings cftv1beta1.CloudflareTunnelSettings, hostname string) *cloudflare.OriginRequestConfig {
 	return &cloudflare.OriginRequestConfig{
+		HTTPHostHeader:         ptr.To(hostname),
 		CAPool:                 tunnelSettings.CAPool,
 		NoTLSVerify:            ptr.To(tunnelSettings.NoTLSVerify),
 		TLSTimeout:             ptr.To(cloudflare.TunnelDuration{Duration: time.Duration(tunnelSettings.TLSTimeoutSeconds) * time.Second}),

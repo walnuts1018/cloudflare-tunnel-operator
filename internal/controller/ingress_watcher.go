@@ -157,7 +157,7 @@ func (r *IngressReconciler) updateCloudflareTunnelConfig(
 			Hostname:      rule.Hostname,
 			Path:          rule.Path,
 			Service:       rule.Service,
-			OriginRequest: domain.ToOriginRequestConfig(tunnelSettings),
+			OriginRequest: domain.ToOriginRequestConfig(tunnelSettings, rule.Hostname),
 		}
 	}
 
@@ -165,7 +165,7 @@ func (r *IngressReconciler) updateCloudflareTunnelConfig(
 		Hostname:      host.Host,
 		Path:          "",
 		Service:       createEndpoint(IP, host.TLS),
-		OriginRequest: domain.ToOriginRequestConfig(tunnelSettings),
+		OriginRequest: domain.ToOriginRequestConfig(tunnelSettings, host.Host),
 	}
 
 	rules[""] = cloudflare.UnvalidatedIngressRule{
