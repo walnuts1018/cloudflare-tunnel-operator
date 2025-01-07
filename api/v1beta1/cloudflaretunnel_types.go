@@ -26,7 +26,7 @@ type CloudflareTunnelSpec struct {
 	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
 
 	// Specifies the image to use for the cloudflared pod.
-	// +kubebuilder:default="cloudflare/cloudflared:2024.12.2"
+	// +kubebuilder:default="cloudflare/cloudflared:2025.1.0"
 	// +optional
 	Image string `json:"image,omitempty"`
 
