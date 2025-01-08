@@ -6,7 +6,7 @@ on:
 jobs:
   image-build:
     name: Build cloudflare-tunnel-operator Custom Docker Image
-    runs-on: ubuntu-latest
+    runs-on: 98e96cb4d328154cc69e3c5d9c737180
     steps:
       - name: Check out
         uses: actions/checkout@v4
