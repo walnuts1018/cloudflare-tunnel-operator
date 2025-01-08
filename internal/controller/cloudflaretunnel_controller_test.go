@@ -10,7 +10,7 @@ import (
 	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	mock_controller "github.com/walnuts1018/cloudflare-tunnel-operator/internal/controller/mock"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
-	. "github.com/walnuts1018/cloudflare-tunnel-operator/test/gomega"
+	. "github.com/walnuts1018/cloudflare-tunnel-operator/pkg/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
