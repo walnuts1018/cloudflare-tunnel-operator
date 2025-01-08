@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	prometheusOperatorURL     = "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.79.1/bundle.yaml"
-	prometheusOperatorCRDsURL = "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.79.1/stripped-down-crds.yaml"
+	prometheusOperatorURL     = "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.79.2/bundle.yaml"
+	prometheusOperatorCRDsURL = "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.79.2/stripped-down-crds.yaml"
 	certmanagerURL            = "https://github.com/jetstack/cert-manager/releases/download/v1.16.0/cert-manager.yaml"
 )
 
