@@ -7,15 +7,10 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: 98e96cb4d328154cc69e3c5d9c737180
+    runs-on: ubuntu-latest
     steps:
       - name: Clone the code
         uses: actions/checkout@v4
-
-      - name: Install Dependency
-        run: |
-          sudo apt update
-          sudo apt install make
 
       - name: Set up Go
         uses: actions/setup-go@v5
