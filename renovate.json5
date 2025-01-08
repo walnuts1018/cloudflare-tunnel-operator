@@ -7,17 +7,32 @@
   customManagers: [
     {
       customType: "regex",
-      fileMatch: "^api/.*/.*_types.go$",
+      fileMatch: [
+        "^api/.*/.*_types.go$",
+      ],
       matchStringsStrategy: "any",
       matchStrings: [
         "\\/\\/\\s\\+kubebuilder:default=\"(?<depName>.*\\/.*?):(?<currentValue>.*)\"",
+      ],
+      datasourceTemplate: "docker",
+    },
+    {
+      customType: "regex",
+      fileMatch: [
+        "^config/crd/bases/cf-tunnel-operator.walnuts.dev_cloudflaretunnels.yaml$",
+      ],
+      matchStringsStrategy: "any",
+      matchStrings: [
         "default:\\s(?<depName>.*\\/.*?):(?<currentValue>.*)"
       ],
       datasourceTemplate: "docker",
     },
     {
       customType: "regex",
-      fileMatch: "^config/.*/kustomization.yaml$",
+      fileMatch:[
+        "^config/.*/kustomization.yaml$",
+        "^test/utils/utils.go$",
+      ],
       matchStringsStrategy: "any",
       matchStrings: [
         "https:\\/\\/github\\.com\\/(?<depName>.*?)\\/releases\\/download\\/(?<currentValue>[^\\/]+)\\/.*\\s*",
