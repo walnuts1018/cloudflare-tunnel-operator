@@ -15,13 +15,9 @@ import (
 )
 
 const (
-	prometheusOperatorVersion = "v0.79.1"
-	prometheusOperatorRepoURL = "https://github.com/prometheus-operator/prometheus-operator/"
-	prometheusOperatorURL     = prometheusOperatorRepoURL + "releases/download/%s/bundle.yaml"
-	prometheusOperatorCRDsURL = prometheusOperatorRepoURL + "releases/download/%s/stripped-down-crds.yaml"
-
-	certmanagerVersion = "v1.16.0"
-	certmanagerURLTmpl = "https://github.com/jetstack/cert-manager/releases/download/%s/cert-manager.yaml"
+	prometheusOperatorURL     = "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.79.1/bundle.yaml"
+	prometheusOperatorCRDsURL = "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.79.1/stripped-down-crds.yaml"
+	certmanagerURL            = "https://github.com/jetstack/cert-manager/releases/download/v1.16.0/cert-manager.yaml"
 )
 
 func warnError(err error) {
@@ -49,8 +45,7 @@ func Run(cmd *exec.Cmd) (string, error) {
 }
 
 func DownloadPrometheusCRDsManifest(ctx context.Context) (path string, err error) {
-	url := fmt.Sprintf(prometheusOperatorCRDsURL, prometheusOperatorVersion)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, prometheusOperatorCRDsURL, nil)
 	if err != nil {
 		return "", err
 	}
@@ -89,16 +84,14 @@ func DownloadPrometheusCRDsManifest(ctx context.Context) (path string, err error
 
 // InstallPrometheusOperator installs the prometheus Operator to be used to export the enabled metrics.
 func InstallPrometheusOperator() error {
-	url := fmt.Sprintf(prometheusOperatorURL, prometheusOperatorVersion)
-	cmd := exec.Command("kubectl", "create", "-f", url)
+	cmd := exec.Command("kubectl", "create", "-f", prometheusOperatorURL)
 	_, err := Run(cmd)
 	return err
 }
 
 // UninstallPrometheusOperator uninstalls the prometheus
 func UninstallPrometheusOperator() {
-	url := fmt.Sprintf(prometheusOperatorURL, prometheusOperatorVersion)
-	cmd := exec.Command("kubectl", "delete", "-f", url)
+	cmd := exec.Command("kubectl", "delete", "-f", prometheusOperatorURL)
 	if _, err := Run(cmd); err != nil {
 		warnError(err)
 	}
@@ -133,8 +126,7 @@ func IsPrometheusCRDsInstalled() bool {
 
 // UninstallCertManager uninstalls the cert manager
 func UninstallCertManager() {
-	url := fmt.Sprintf(certmanagerURLTmpl, certmanagerVersion)
-	cmd := exec.Command("kubectl", "delete", "-f", url)
+	cmd := exec.Command("kubectl", "delete", "-f", certmanagerURL)
 	if _, err := Run(cmd); err != nil {
 		warnError(err)
 	}
@@ -142,8 +134,7 @@ func UninstallCertManager() {
 
 // InstallCertManager installs the cert manager bundle.
 func InstallCertManager() error {
-	url := fmt.Sprintf(certmanagerURLTmpl, certmanagerVersion)
-	cmd := exec.Command("kubectl", "apply", "-f", url)
+	cmd := exec.Command("kubectl", "apply", "-f", certmanagerURL)
 	if _, err := Run(cmd); err != nil {
 		return err
 	}
