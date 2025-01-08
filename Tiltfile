@@ -32,6 +32,7 @@ local_resource(
 
 # Deploy manager
 watch_file('./config/')
+# k8s_yaml('./config/dev/namespace.yaml')
 k8s_yaml(kustomize('./config/dev'))
 
 local_resource(

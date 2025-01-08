@@ -29,6 +29,9 @@ func SetupCloudflareTunnelWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
+// +kubebuilder:rbac:groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:webhook:path=/mutate-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel,mutating=true,failurePolicy=fail,sideEffects=None,groups=cf-tunnel-operator.walnuts.dev,resources=cloudflaretunnels,verbs=create;update,versions=v1beta1,name=vcloudflaretunnel-v1beta1.kb.io,admissionReviewVersions=v1
+
 type CloudflareTunnelCustomDefaulter struct {
 }
 

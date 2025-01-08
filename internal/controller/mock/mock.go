@@ -70,6 +70,20 @@ func (mr *MockCloudflareTunnelManagerMockRecorder) CreateTunnel(ctx, Name any) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTunnel", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).CreateTunnel), ctx, Name)
 }
 
+// DeleteAllDNS mocks base method.
+func (m *MockCloudflareTunnelManager) DeleteAllDNS(ctx context.Context, tunnelID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAllDNS", ctx, tunnelID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAllDNS indicates an expected call of DeleteAllDNS.
+func (mr *MockCloudflareTunnelManagerMockRecorder) DeleteAllDNS(ctx, tunnelID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAllDNS", reflect.TypeOf((*MockCloudflareTunnelManager)(nil).DeleteAllDNS), ctx, tunnelID)
+}
+
 // DeleteDNS mocks base method.
 func (m *MockCloudflareTunnelManager) DeleteDNS(ctx context.Context, tunnelID string, record domain.DNSRecord) error {
 	m.ctrl.T.Helper()
