@@ -11,6 +11,7 @@
       matchStringsStrategy: "any",
       matchStrings: [
         "\\/\\/\\s\\+kubebuilder:default=\"(?<depName>.*\\/.*?):(?<currentValue>.*)\"",
+        "default:\\s(?<depName>.*\\/.*?):(?<currentValue>.*)"
       ],
       datasourceTemplate: "docker",
     },
