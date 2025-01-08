@@ -102,10 +102,20 @@ func (c *CloudflareTunnelClient) UpdateTunnelConfiguration(ctx context.Context, 
 	return nil
 }
 
+const managedBy = "cloudflare-tunnel-operator"
+
+type DNSComment struct {
+	ManagedBy string `json:"managed-by"`
+	TunnelID  string `json:"tunnelID"`
+}
+
 func (c *CloudflareTunnelClient) AddDNS(ctx context.Context, tunnelID string, hostname string) error {
-	comment, err := json.Marshal(map[string]string{"managed-by": "cloudflare-tunnel-operator", "tunnelID": tunnelID})
+	comment, err := json.Marshal(DNSComment{
+		ManagedBy: managedBy,
+		TunnelID:  tunnelID,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to update tunnel configs: %v", err)
+		return fmt.Errorf("failed to generate comment: %v", err)
 	}
 
 	if _, err := c.client.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.CreateDNSRecordParams{
@@ -116,7 +126,7 @@ func (c *CloudflareTunnelClient) AddDNS(ctx context.Context, tunnelID string, ho
 		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
 		Comment: string(comment),
 	}); err != nil {
-		return fmt.Errorf("failed to update tunnel configs: %v", err)
+		return fmt.Errorf("failed to create DNS record: %v", err)
 	}
 	return nil
 }
@@ -127,7 +137,7 @@ func (c *CloudflareTunnelClient) GetDNS(ctx context.Context, tunnelID string, ho
 		Type: "CNAME",
 	})
 	if err != nil {
-		return domain.DNSRecord{}, fmt.Errorf("failed to update tunnel configs: %v", err)
+		return domain.DNSRecord{}, fmt.Errorf("failed to get DNS record: %v", err)
 	}
 
 	if len(records) == 0 {
@@ -138,9 +148,12 @@ func (c *CloudflareTunnelClient) GetDNS(ctx context.Context, tunnelID string, ho
 }
 
 func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string, hostname string, current domain.DNSRecord) error {
-	comment, err := json.Marshal(map[string]string{"managed-by": "cloudflare-tunnel-operator", "tunnelID": tunnelID})
+	comment, err := json.Marshal(DNSComment{
+		ManagedBy: managedBy,
+		TunnelID:  tunnelID,
+	})
 	if err != nil {
-		return fmt.Errorf("failed to update tunnel configs: %v", err)
+		return fmt.Errorf("failed to generate comment: %v", err)
 	}
 
 	if _, err := c.client.UpdateDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.UpdateDNSRecordParams{
@@ -152,14 +165,43 @@ func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string,
 		Comment: ptr.To(string(comment)),
 		Content: fmt.Sprintf("%v.cfargotunnel.com", tunnelID),
 	}); err != nil {
-		return fmt.Errorf("failed to update tunnel configs: %v", err)
+		return fmt.Errorf("failed to update DNS record: %v", err)
 	}
 	return nil
 }
 
 func (c *CloudflareTunnelClient) DeleteDNS(ctx context.Context, tunnelID string, record domain.DNSRecord) error {
 	if err := c.client.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), record.ID); err != nil {
-		return fmt.Errorf("failed to update tunnel configs: %v", err)
+		return fmt.Errorf("failed to delete DNS record: %v", err)
+	}
+	return nil
+}
+
+func (c *CloudflareTunnelClient) DeleteAllDNS(ctx context.Context, tunnelID string) error {
+	comment, err := json.Marshal(DNSComment{
+		ManagedBy: managedBy,
+		TunnelID:  tunnelID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to generate comment: %v", err)
+	}
+
+	records, _, err := c.client.ListDNSRecords(ctx, cloudflare.ZoneIdentifier(c.zoneID), cloudflare.ListDNSRecordsParams{
+		Type:    "CNAME",
+		Comment: string(comment),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to get DNS record: %v", err)
+	}
+
+	if len(records) == 0 {
+		return nil
+	}
+
+	for _, record := range records {
+		if err := c.client.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), record.ID); err != nil {
+			return fmt.Errorf("failed to update tunnel configs: %v", err)
+		}
 	}
 	return nil
 }

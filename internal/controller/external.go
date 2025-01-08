@@ -24,4 +24,5 @@ type CloudflareTunnelManager interface {
 	GetDNS(ctx context.Context, tunnelID string, hostname string) (domain.DNSRecord, error)
 	UpdateDNS(ctx context.Context, tunnelID string, hostname string, current domain.DNSRecord) error
 	DeleteDNS(ctx context.Context, tunnelID string, record domain.DNSRecord) error
+	DeleteAllDNS(ctx context.Context, tunnelID string) error
 }

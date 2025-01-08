@@ -83,6 +83,10 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	if !cfTunnel.ObjectMeta.DeletionTimestamp.IsZero() {
 		if controllerutil.ContainsFinalizer(&cfTunnel, finalizerName) {
+			if err := r.CloudflareTunnelManager.DeleteAllDNS(ctx, cfTunnel.Status.TunnelID); err != nil {
+				return ctrl.Result{}, fmt.Errorf("failed to delete CloudflareTunnel: %w", err)
+			}
+
 			if err := r.CloudflareTunnelManager.DeleteTunnel(ctx, cfTunnel.Status.TunnelID); err != nil {
 				return ctrl.Result{}, fmt.Errorf("failed to delete Cloudflare Tunnel: %w", err)
 			}
