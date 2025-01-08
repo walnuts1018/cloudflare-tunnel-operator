@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: cloudflare-tunnel-operator-system/cloudflare-tunnel-operator-serving-cert
-    controller-gen.kubebuilder.io/version: v0.16.5
+    controller-gen.kubebuilder.io/version: v0.17.0
   name: cloudflaretunnels.cf-tunnel-operator.walnuts.dev
 spec:
   group: cf-tunnel-operator.walnuts.dev
@@ -602,7 +602,7 @@ spec:
                   type: object
                 type: array
               image:
-                default: cloudflare/cloudflared:2024.12.2
+                default: cloudflare/cloudflared:2025.1.0
                 description: Specifies the image to use for the cloudflared pod.
                 type: string
               imagePullSecrets:
@@ -718,7 +718,7 @@ spec:
                       are running a WSGI server.
                     type: boolean
                   http2Origin:
-                    default: true
+                    default: false
                     description: Attempt to connect to origin using HTTP2. Origin
                       must be configured as https.
                     type: boolean

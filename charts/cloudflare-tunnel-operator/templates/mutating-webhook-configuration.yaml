@@ -1,0 +1,29 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "cloudflare-tunnel-operator.fullname" . }}-mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "cloudflare-tunnel-operator.fullname" . }}-serving-cert
+  labels:
+  {{- include "cloudflare-tunnel-operator.labels" . | nindent 4 }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "cloudflare-tunnel-operator.fullname" . }}-webhook-service'
+      namespace: '{{ .Release.Namespace }}'
+      path: /mutate-cf-tunnel-operator-walnuts-dev-v1beta1-cloudflaretunnel
+  failurePolicy: Fail
+  name: vcloudflaretunnel-v1beta1.kb.io
+  rules:
+  - apiGroups:
+    - cf-tunnel-operator.walnuts.dev
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - cloudflaretunnels
+  sideEffects: None
