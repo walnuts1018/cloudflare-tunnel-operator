@@ -2,27 +2,30 @@ package external
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
-	cloudflare "github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/option"
+	"github.com/cloudflare/cloudflare-go/v4/zero_trust"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/utils/random"
 	"k8s.io/utils/ptr"
 )
 
 type CloudflareTunnelClient struct {
-	client    *cloudflare.API
+	client    *cloudflare.Client
 	accountId string
 	zoneID    string
 	random    random.Random
 }
 
 func NewCloudflareTunnelClient(apiToken string, accountId string, zoneID string, random random.Random) (*CloudflareTunnelClient, error) {
-	client, err := cloudflare.NewWithAPIToken(apiToken)
-	if err != nil {
-		return nil, fmt.Errorf("failed to initialize cloudflare provider: %v", err)
-	}
+	client := cloudflare.NewClient(
+		option.WithAPIToken(apiToken),
+	)
+
 	return &CloudflareTunnelClient{
 		client:    client,
 		accountId: accountId,
@@ -37,10 +40,11 @@ func (c *CloudflareTunnelClient) CreateTunnel(ctx context.Context, name string) 
 		return domain.CloudflareTunnel{}, fmt.Errorf("failed to generate secret: %v", err)
 	}
 
-	t, err := c.client.CreateTunnel(ctx, cloudflare.AccountIdentifier(c.accountId), cloudflare.TunnelCreateParams{
-		Name:      name,
-		ConfigSrc: "cloudflare",
-		Secret:    secret,
+	t, err := c.client.ZeroTrust.Tunnels.New(ctx, zero_trust.TunnelNewParams{
+		AccountID:    cloudflare.F(c.accountId),
+		Name:         cloudflare.F(name),
+		ConfigSrc:    cloudflare.F(zero_trust.TunnelNewParamsConfigSrcCloudflare),
+		TunnelSecret: cloudflare.F(base64.StdEncoding.EncodeToString([]byte(secret))),
 	})
 	if err != nil {
 		return domain.CloudflareTunnel{}, fmt.Errorf("failed to create tunnel: %v", err)
@@ -53,13 +57,19 @@ func (c *CloudflareTunnelClient) CreateTunnel(ctx context.Context, name string) 
 }
 
 func (c *CloudflareTunnelClient) DeleteTunnel(ctx context.Context, id string) error {
-	if err := c.client.DeleteTunnel(ctx, cloudflare.AccountIdentifier(c.accountId), id); err != nil {
+	if _, err := c.client.ZeroTrust.Tunnels.Delete(ctx, id, zero_trust.TunnelDeleteParams{
+		AccountID: cloudflare.F(c.accountId),
+	}); err != nil {
 		return fmt.Errorf("failed to delete tunnel: %v", err)
 	}
 	return nil
 }
 
 func (c *CloudflareTunnelClient) GetTunnelToken(ctx context.Context, tunnelID string) (domain.CloudflareTunnelToken, error) {
+	token, err := c.client.ZeroTrust.Tunnels.Get(ctx, tunnelID, zero_trust.TunnelGetParams{
+		AccountID: cloudflare.F(c.accountId),
+	})
+
 	t, err := c.client.GetTunnelToken(ctx, cloudflare.AccountIdentifier(c.accountId), tunnelID)
 	if err != nil {
 		return "", fmt.Errorf("failed to get tunnel token: %v", err)

@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	cloudflare "github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
 	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"k8s.io/utils/ptr"
 )

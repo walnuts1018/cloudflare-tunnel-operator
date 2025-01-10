@@ -3,7 +3,7 @@ package domain
 import (
 	"fmt"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
 )
 
 type CloudflareTunnel struct {

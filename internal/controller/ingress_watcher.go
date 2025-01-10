@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
 	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/consts"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"

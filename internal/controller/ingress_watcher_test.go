@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/cloudflare/cloudflare-go"
+	"github.com/cloudflare/cloudflare-go/v4"
 	. "github.com/onsi/ginkgo/v2"
 	"github.com/stretchr/testify/assert"
 	cftv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
