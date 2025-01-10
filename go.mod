@@ -6,6 +6,7 @@ require (
 	dario.cat/mergo v1.0.1
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/cloudflare/cloudflare-go v0.113.0
+	github.com/cloudflare/cloudflare-go/v4 v4.0.0
 	github.com/go-logr/logr v1.4.2
 	github.com/google/go-cmp v0.6.0
 	github.com/joho/godotenv v1.5.1
