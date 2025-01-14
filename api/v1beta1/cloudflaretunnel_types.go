@@ -50,7 +50,6 @@ type CloudflareTunnelSpec struct {
 	TopologySpreadConstraints TopologySpreadConstraintApplyConfigurationList `json:"topologySpreadConstraints,omitempty"`
 
 	// Specifies the affinity for scheduling.
-	// Default: podAntiAffinity: preferredDuringSchedulingIgnoredDuringExecution by hostname
 	// +optional
 	Affinity *AffinityApplyConfiguration `json:"affinity,omitempty"`
 
