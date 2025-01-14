@@ -11,6 +11,7 @@ import (
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/domain"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/api/meta"
@@ -149,6 +150,14 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	if err := r.reconcileServiceMonitor(ctx, cfTunnel); err != nil {
+		result, err2 := r.updateStatus(ctx, cfTunnel)
+		if err2 != nil {
+			logger.Error(err2, "Failed to update CloudflareTunnel status.", "name", req.Name, "namespace", req.Namespace)
+		}
+		return result, err
+	}
+
+	if err := r.reconcilePDB(ctx, cfTunnel); err != nil {
 		result, err2 := r.updateStatus(ctx, cfTunnel)
 		if err2 != nil {
 			logger.Error(err2, "Failed to update CloudflareTunnel status.", "name", req.Name, "namespace", req.Namespace)
@@ -518,7 +527,10 @@ func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context
 	sm.SetName(cfTunnel.Name)
 	sm.SetLabels(appLabels(cfTunnel))
 
-	op, err := ctrl.CreateOrUpdate(ctx, r.Client, sm, func() error {
+	result, err := ctrl.CreateOrUpdate(ctx, r.Client, sm, func() error {
+		if sm.DeletionTimestamp != nil {
+			return nil
+		}
 		if sm.Spec.Selector.MatchLabels == nil {
 			sm.Spec.Selector.MatchLabels = make(map[string]string)
 		}
@@ -547,6 +559,11 @@ func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context
 
 		sm.Spec.NamespaceSelector.MatchNames = []string{cfTunnel.Namespace}
 
+		if sm.CreationTimestamp.IsZero() {
+			if err := ctrl.SetControllerReference(&cfTunnel, sm, r.Scheme); err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 
@@ -554,8 +571,58 @@ func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context
 		logger.Error(err, "unable to create or update ServiceMonitor", "name", cfTunnel.Name, "namespace", cfTunnel.Namespace)
 		return err
 	}
-	if op != controllerutil.OperationResultNone {
-		logger.Info("reconcile ServiceMonitor", "operation", op)
+	if result != controllerutil.OperationResultNone {
+		logger.Info("reconcile ServiceMonitor", "result", result)
+	}
+	return nil
+}
+
+func (r *CloudflareTunnelReconciler) reconcilePDB(ctx context.Context, cfTunnel cftv1beta1.CloudflareTunnel) error {
+	logger := log.FromContext(ctx)
+	if cfTunnel.Spec.PodDisruptionBudget == nil {
+		return nil
+	}
+
+	pdb := &policyv1.PodDisruptionBudget{}
+	pdb.SetNamespace(cfTunnel.Namespace)
+	pdb.SetName(cfTunnel.Name)
+	pdb.SetLabels(appLabels(cfTunnel))
+
+	result, err := ctrl.CreateOrUpdate(ctx, r.Client, pdb, func() error {
+		if pdb.DeletionTimestamp != nil {
+			return nil
+		}
+
+		if pdb.Labels == nil {
+			pdb.Labels = make(map[string]string)
+		}
+		for name, content := range appLabels(cfTunnel) {
+			pdb.Labels[name] = content
+		}
+
+		if cfTunnel.Spec.PodDisruptionBudget.MinAvailable != nil {
+			pdb.Spec.MinAvailable = cfTunnel.Spec.PodDisruptionBudget.MinAvailable
+		}
+		if cfTunnel.Spec.PodDisruptionBudget.MaxUnavailable != nil {
+			pdb.Spec.MaxUnavailable = cfTunnel.Spec.PodDisruptionBudget.MaxUnavailable
+		}
+		pdb.Spec.Selector = &metav1.LabelSelector{
+			MatchLabels: appLabels(cfTunnel),
+		}
+
+		if pdb.CreationTimestamp.IsZero() {
+			if err := ctrl.SetControllerReference(&cfTunnel, pdb, r.Scheme); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create or update PDB: %w", err)
+	}
+
+	if result != controllerutil.OperationResultNone {
+		logger.Info("reconcile PodDisruptionBudget", "result", result)
 	}
 	return nil
 }

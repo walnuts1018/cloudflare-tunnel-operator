@@ -13,6 +13,7 @@ import (
 	. "github.com/walnuts1018/cloudflare-tunnel-operator/pkg/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	policyv1 "k8s.io/api/policy/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -34,6 +35,7 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 		desiredDeployment := &appsv1.Deployment{}
 		desiredService := &corev1.Service{}
 		desiredServiceMonitor := &monitoringv1.ServiceMonitor{}
+		desiredPDB := &policyv1.PodDisruptionBudget{}
 
 		BeforeEach(func() {
 			By("Reading the CloudflareTunnel manifest & decoding it")
@@ -60,6 +62,11 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 			desiredServiceMonitorManifest, err := content.ReadFile("testdata/servicemonitor.yaml")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(yaml.Unmarshal(desiredServiceMonitorManifest, desiredServiceMonitor)).To(Succeed())
+
+			By("Reading the desired PodDisruptionBudget manifest & decoding it")
+			desiredPDBManifest, err := content.ReadFile("testdata/pdb.yaml")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(yaml.Unmarshal(desiredPDBManifest, desiredPDB)).To(Succeed())
 
 			By("creating the custom resource for the Kind CloudflareTunnel")
 			err = k8sClient.Get(ctx, namespacedName, &cftunneloperatorv1beta1.CloudflareTunnel{})
@@ -123,6 +130,14 @@ var _ = Describe("CloudflareTunnel Controller", func() {
 				return k8sClient.Get(ctx, namespacedName, gotServiceMonitor)
 			}).Should(Succeed())
 			Expect(*gotServiceMonitor).Should(HaveFields(*desiredServiceMonitor))
+
+			By("Check if PodDisruptionBudget is created")
+			var gotPDB *policyv1.PodDisruptionBudget
+			Eventually(func() error {
+				gotPDB = &policyv1.PodDisruptionBudget{}
+				return k8sClient.Get(ctx, namespacedName, gotPDB)
+			}).Should(Succeed())
+			Expect(*gotPDB).Should(HaveFields(*desiredPDB))
 		})
 	})
 })

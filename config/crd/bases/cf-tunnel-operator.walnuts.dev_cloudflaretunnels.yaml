@@ -631,6 +631,23 @@ spec:
                   type: string
                 description: Specifies the node selector for scheduling.
                 type: object
+              podDisruptionBudget:
+                properties:
+                  maxUnavailable:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: MaxUnavailable is the maximum number of pods that
+                      can be unavailable at any given time.
+                    x-kubernetes-int-or-string: true
+                  minAvailable:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: MinAvailable is the minimum number of pods that must
+                      be available at any given time.
+                    x-kubernetes-int-or-string: true
+                type: object
               replicas:
                 default: 1
                 description: Replicas is the number of cloudflared pods.
