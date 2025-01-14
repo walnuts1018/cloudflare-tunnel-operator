@@ -46,6 +46,7 @@ type CloudflareTunnelSpec struct {
 	Tolerations TolerationApplyConfigurationList `json:"tolerations,omitempty"`
 
 	// Specifies the affinity for scheduling.
+	// Default: podAntiAffinity: preferredDuringSchedulingIgnoredDuringExecution by hostname
 	// +optional
 	Affinity *AffinityApplyConfiguration `json:"affinity,omitempty"`
 

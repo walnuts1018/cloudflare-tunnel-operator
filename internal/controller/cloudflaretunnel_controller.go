@@ -321,7 +321,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 	}
 
 	affinity := corev1apply.Affinity().
-		WithPodAffinity(corev1apply.PodAffinity().
+		WithPodAntiAffinity(corev1apply.PodAntiAffinity().
 			WithPreferredDuringSchedulingIgnoredDuringExecution(corev1apply.WeightedPodAffinityTerm().
 				WithWeight(100).
 				WithPodAffinityTerm(corev1apply.PodAffinityTerm().
