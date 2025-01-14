@@ -320,23 +320,32 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 		})
 	}
 
-	affinity := corev1apply.Affinity().
-		WithPodAffinity(corev1apply.PodAffinity().
-			WithPreferredDuringSchedulingIgnoredDuringExecution(corev1apply.WeightedPodAffinityTerm().
-				WithWeight(100).
-				WithPodAffinityTerm(corev1apply.PodAffinityTerm().
-					WithTopologyKey("kubernetes.io/hostname").
-					WithLabelSelector(metav1apply.LabelSelector().
-						WithMatchLabels(map[string]string{
-							"app.kubernetes.io/name": appName,
-						}),
-					),
-				),
+	topologySpreadConstraints := []*corev1apply.TopologySpreadConstraintApplyConfiguration{
+		corev1apply.TopologySpreadConstraint().
+			WithMaxSkew(1).
+			WithTopologyKey("topology.kubernetes.io/zone").
+			WithWhenUnsatisfiable(corev1.ScheduleAnyway).
+			WithLabelSelector(metav1apply.LabelSelector().
+				WithMatchLabels(appLabels(cfTunnel)),
 			),
-		)
+		corev1apply.TopologySpreadConstraint().
+			WithMaxSkew(1).
+			WithTopologyKey("topology.kubernetes.io/region").
+			WithWhenUnsatisfiable(corev1.ScheduleAnyway).
+			WithLabelSelector(metav1apply.LabelSelector().
+				WithMatchLabels(appLabels(cfTunnel)),
+			),
+		corev1apply.TopologySpreadConstraint().
+			WithMaxSkew(1).
+			WithTopologyKey("kubernetes.io/hostname").
+			WithWhenUnsatisfiable(corev1.ScheduleAnyway).
+			WithLabelSelector(metav1apply.LabelSelector().
+				WithMatchLabels(appLabels(cfTunnel)),
+			),
+	}
 
-	if cfTunnel.Spec.Affinity != nil {
-		affinity = cfTunnel.Spec.Affinity.Ref()
+	if len(cfTunnel.Spec.TopologySpreadConstraints) > 0 {
+		topologySpreadConstraints = cfTunnel.Spec.TopologySpreadConstraints.Ref()
 	}
 
 	imagePullSecrets := make([]*corev1apply.LocalObjectReferenceApplyConfiguration, 0, len(cfTunnel.Spec.ImagePullSecrets))
@@ -366,6 +375,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 			WithTemplate(corev1apply.PodTemplateSpec().
 				WithLabels(labels).
 				WithSpec(corev1apply.PodSpec().
+					WithTopologySpreadConstraints(topologySpreadConstraints...).
 					WithSecurityContext(corev1apply.PodSecurityContext().
 						WithSysctls(corev1apply.Sysctl().
 							WithName("net.ipv4.ping_group_range").
@@ -400,7 +410,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 					).
 					WithNodeSelector(cfTunnel.Spec.NodeSelector).
 					WithTolerations(cfTunnel.Spec.Tolerations...).
-					WithAffinity(affinity),
+					WithAffinity(cfTunnel.Spec.Affinity.Ref()),
 				),
 			),
 		)

@@ -34,6 +34,22 @@ spec:
     - key: key2
       operator: Exists
       effect: NoExecute
+  topologySpreadConstraints:
+  - labelSelector:
+      matchExpressions:
+      - key: key1
+        operator: In
+        values:
+        - value1
+        - value2
+      - key: key2
+        operator: NotIn
+        values:
+        - value3
+        - value4
+    maxSkew: 1
+    topologyKey: topologyKey1
+    whenUnsatisfiable: DoNotSchedule
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

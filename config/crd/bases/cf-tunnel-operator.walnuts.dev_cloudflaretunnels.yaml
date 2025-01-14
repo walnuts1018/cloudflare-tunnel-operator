@@ -782,6 +782,65 @@ spec:
                       type: string
                   type: object
                 type: array
+              topologySpreadConstraints:
+                description: Specifies the topology spread constraints for scheduling.
+                items:
+                  description: |-
+                    TopologySpreadConstraintApplyConfiguration represents a declarative configuration of the TopologySpreadConstraint type for use
+                    with apply.
+                  properties:
+                    labelSelector:
+                      description: |-
+                        LabelSelectorApplyConfiguration represents a declarative configuration of the LabelSelector type for use
+                        with apply.
+                      properties:
+                        matchExpressions:
+                          items:
+                            description: |-
+                              LabelSelectorRequirementApplyConfiguration represents a declarative configuration of the LabelSelectorRequirement type for use
+                              with apply.
+                            properties:
+                              key:
+                                type: string
+                              operator:
+                                description: A label selector operator is the set
+                                  of operators that can be used in a selector requirement.
+                                type: string
+                              values:
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          type: array
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          type: object
+                      type: object
+                    matchLabelKeys:
+                      items:
+                        type: string
+                      type: array
+                    maxSkew:
+                      format: int32
+                      type: integer
+                    minDomains:
+                      format: int32
+                      type: integer
+                    nodeAffinityPolicy:
+                      description: NodeInclusionPolicy defines the type of node inclusion
+                        policy
+                      type: string
+                    nodeTaintsPolicy:
+                      description: NodeInclusionPolicy defines the type of node inclusion
+                        policy
+                      type: string
+                    topologyKey:
+                      type: string
+                    whenUnsatisfiable:
+                      type: string
+                  type: object
+                type: array
             type: object
           status:
             description: CloudflareTunnelStatus defines the observed state of CloudflareTunnel.

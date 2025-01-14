@@ -45,6 +45,10 @@ type CloudflareTunnelSpec struct {
 	// +optional
 	Tolerations TolerationApplyConfigurationList `json:"tolerations,omitempty"`
 
+	// Specifies the topology spread constraints for scheduling.
+	// +optional
+	TopologySpreadConstraints TopologySpreadConstraintApplyConfigurationList `json:"topologySpreadConstraints,omitempty"`
+
 	// Specifies the affinity for scheduling.
 	// +optional
 	Affinity *AffinityApplyConfiguration `json:"affinity,omitempty"`
