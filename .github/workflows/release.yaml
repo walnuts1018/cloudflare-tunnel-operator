@@ -2,6 +2,7 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   image-build:
@@ -25,7 +26,10 @@ jobs:
           version: latest
 
       - name: Get Tag from Release
-        run: echo "ImageTag=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        id: GetTag
+        run:
+          echo "ImageTag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v6
@@ -38,12 +42,12 @@ jobs:
           build-args: TARGETOS=linux
           tags: |
             ghcr.io/walnuts1018/cloudflare-tunnel-operator:latest
-            ghcr.io/walnuts1018/cloudflare-tunnel-operator:${{ github.event.release.tag_name }}
+            ghcr.io/walnuts1018/cloudflare-tunnel-operator:${{ steps.GetTag.outputs.ImageTag }}
 
   chart-release:
     runs-on: ubuntu-latest
     needs: image-build
-    if: ${{ success() }}
+    if: ${{ success() }} && github.event_name == 'release'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,15 +56,15 @@ jobs:
 
       - name: Set chart version
         run: |
-          sed --in-place "s/version-placeholder/${{ github.event.release.tag_name }}/g" charts/cloudflare-tunnel-operator/Chart.yaml
-          sed --in-place "s/version-placeholder/${{ github.event.release.tag_name }}/g" charts/cloudflare-tunnel-operator/Chart.yaml
-          sed --in-place "s/latest/${{ github.event.release.tag_name }}/g" charts/cloudflare-tunnel-operator/values.yaml
+          sed --in-place "s/version-placeholder/${{ github.ref_name }}/g" charts/cloudflare-tunnel-operator/Chart.yaml
+          sed --in-place "s/version-placeholder/${{ github.ref_name }}/g" charts/cloudflare-tunnel-operator/Chart.yaml
+          sed --in-place "s/latest/${{ github.ref_name }}/g" charts/cloudflare-tunnel-operator/values.yaml
           sed --in-place "s/repository: controller/repository: ghcr.io\/walnuts1018\/cloudflare-tunnel-operator/g" charts/cloudflare-tunnel-operator/values.yaml
 
       - name: Create release notes
         run: |
           # Helm Chart のリリースノートには、本体のリリースへのリンクを追加する
-          tag_version=${GITHUB_REF##*/}
+          tag_version=${{ github.ref_name }}
           cat <<EOF > ./charts/cloudflare-tunnel-operator/RELEASE.md
           Helm chart [$tag_version](https://github.com/walnuts1018/cloudflare-tunnel-operator/releases/tag/$tag_version)
 
