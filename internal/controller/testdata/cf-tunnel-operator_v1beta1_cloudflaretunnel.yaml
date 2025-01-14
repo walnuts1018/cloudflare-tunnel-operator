@@ -142,3 +142,5 @@ spec:
                     - value4
             topologyKey: topologyKey1
   enableServiceMonitor: true
+  podDisruptionBudget:
+    minAvailable: 1

@@ -3,6 +3,7 @@ package v1beta1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // CloudflareTunnelSpec defines the desired state of CloudflareTunnel.
@@ -58,7 +59,20 @@ type CloudflareTunnelSpec struct {
 	EnableServiceMonitor bool `json:"enableServiceMonitor,omitempty"`
 
 	// +optional
+	PodDisruptionBudget *PDBSpec `json:"podDisruptionBudget,omitempty"`
+
+	// +optional
 	Settings CloudflareTunnelSettings `json:"settings,omitempty"`
+}
+
+type PDBSpec struct {
+	// MinAvailable is the minimum number of pods that must be available at any given time.
+	// +optional
+	MinAvailable *intstr.IntOrString `json:"minAvailable,omitempty"`
+
+	// MaxUnavailable is the maximum number of pods that can be unavailable at any given time.
+	// +optional
+	MaxUnavailable *intstr.IntOrString `json:"maxUnavailable,omitempty"`
 }
 
 type CloudflareTunnelSettings struct {
