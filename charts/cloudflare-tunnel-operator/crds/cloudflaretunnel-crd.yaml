@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: cloudflare-tunnel-operator-system/cloudflare-tunnel-operator-serving-cert
-    controller-gen.kubebuilder.io/version: v0.17.0
+    controller-gen.kubebuilder.io/version: v0.17.1
   name: cloudflaretunnels.cf-tunnel-operator.walnuts.dev
 spec:
   group: cf-tunnel-operator.walnuts.dev
@@ -15,6 +15,10 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - description: Default Tunnel
+      jsonPath: .spec.default
+      name: DEFAULT
+      type: boolean
     - description: Replica Count
       jsonPath: .spec.replicas
       name: REPLICAS
@@ -22,10 +26,6 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: AGE
       type: date
-    - description: Default Tunnel
-      jsonPath: .spec.default
-      name: DEFAULT
-      type: boolean
     name: v1beta1
     schema:
       openAPIV3Schema:
@@ -631,6 +631,23 @@ spec:
                   type: string
                 description: Specifies the node selector for scheduling.
                 type: object
+              podDisruptionBudget:
+                properties:
+                  maxUnavailable:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: MaxUnavailable is the maximum number of pods that
+                      can be unavailable at any given time.
+                    x-kubernetes-int-or-string: true
+                  minAvailable:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: MinAvailable is the minimum number of pods that must
+                      be available at any given time.
+                    x-kubernetes-int-or-string: true
+                type: object
               replicas:
                 default: 1
                 description: Replicas is the number of cloudflared pods.
@@ -779,6 +796,65 @@ spec:
                       format: int64
                       type: integer
                     value:
+                      type: string
+                  type: object
+                type: array
+              topologySpreadConstraints:
+                description: Specifies the topology spread constraints for scheduling.
+                items:
+                  description: |-
+                    TopologySpreadConstraintApplyConfiguration represents a declarative configuration of the TopologySpreadConstraint type for use
+                    with apply.
+                  properties:
+                    labelSelector:
+                      description: |-
+                        LabelSelectorApplyConfiguration represents a declarative configuration of the LabelSelector type for use
+                        with apply.
+                      properties:
+                        matchExpressions:
+                          items:
+                            description: |-
+                              LabelSelectorRequirementApplyConfiguration represents a declarative configuration of the LabelSelectorRequirement type for use
+                              with apply.
+                            properties:
+                              key:
+                                type: string
+                              operator:
+                                description: A label selector operator is the set
+                                  of operators that can be used in a selector requirement.
+                                type: string
+                              values:
+                                items:
+                                  type: string
+                                type: array
+                            type: object
+                          type: array
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          type: object
+                      type: object
+                    matchLabelKeys:
+                      items:
+                        type: string
+                      type: array
+                    maxSkew:
+                      format: int32
+                      type: integer
+                    minDomains:
+                      format: int32
+                      type: integer
+                    nodeAffinityPolicy:
+                      description: NodeInclusionPolicy defines the type of node inclusion
+                        policy
+                      type: string
+                    nodeTaintsPolicy:
+                      description: NodeInclusionPolicy defines the type of node inclusion
+                        policy
+                      type: string
+                    topologyKey:
+                      type: string
+                    whenUnsatisfiable:
                       type: string
                   type: object
                 type: array
