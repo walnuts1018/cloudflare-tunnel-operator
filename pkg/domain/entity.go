@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cloudflare/cloudflare-go/v4"
+	"github.com/cloudflare/cloudflare-go/v4/zero_trust"
 )
 
 type CloudflareTunnel struct {
@@ -13,7 +14,7 @@ type CloudflareTunnel struct {
 
 type CloudflareTunnelToken string
 
-type TunnelConfiguration cloudflare.TunnelConfiguration
+type TunnelConfiguration zero_trust.TunnelConfigurationGetResponseConfig
 
 type DNSRecord cloudflare.DNSRecord
 

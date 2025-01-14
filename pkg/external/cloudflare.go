@@ -66,19 +66,22 @@ func (c *CloudflareTunnelClient) DeleteTunnel(ctx context.Context, id string) er
 }
 
 func (c *CloudflareTunnelClient) GetTunnelToken(ctx context.Context, tunnelID string) (domain.CloudflareTunnelToken, error) {
-	token, err := c.client.ZeroTrust.Tunnels.Get(ctx, tunnelID, zero_trust.TunnelGetParams{
+	token, err := c.client.ZeroTrust.Tunnels.Token.Get(ctx, tunnelID, zero_trust.TunnelTokenGetParams{
 		AccountID: cloudflare.F(c.accountId),
 	})
-
-	t, err := c.client.GetTunnelToken(ctx, cloudflare.AccountIdentifier(c.accountId), tunnelID)
 	if err != nil {
 		return "", fmt.Errorf("failed to get tunnel token: %v", err)
 	}
-	return domain.CloudflareTunnelToken(t), nil
+	if token == nil {
+		return "", fmt.Errorf("failed to get tunnel token: token is nil")
+	}
+	return domain.CloudflareTunnelToken(*token), nil
 }
 
 func (c *CloudflareTunnelClient) GetTunnel(ctx context.Context, id string) (domain.CloudflareTunnel, error) {
-	t, err := c.client.GetTunnel(ctx, cloudflare.AccountIdentifier(c.accountId), id)
+	t, err := c.client.ZeroTrust.Tunnels.Get(ctx, id, zero_trust.TunnelGetParams{
+		AccountID: cloudflare.F(c.accountId),
+	})
 	if err != nil {
 		return domain.CloudflareTunnel{}, fmt.Errorf("failed to get tunnel: %v", err)
 	}
@@ -89,12 +92,10 @@ func (c *CloudflareTunnelClient) GetTunnel(ctx context.Context, id string) (doma
 	}, nil
 }
 
-func (c *CloudflareTunnelClient) DeleteToken(ctx context.Context, tunnelID string) error {
-	return nil
-}
-
 func (c *CloudflareTunnelClient) GetTunnelConfiguration(ctx context.Context, tunnelID string) (domain.TunnelConfiguration, error) {
-	result, err := c.client.GetTunnelConfiguration(ctx, cloudflare.AccountIdentifier(c.accountId), tunnelID)
+	result, err := c.client.ZeroTrust.Tunnels.Configurations.Get(ctx, tunnelID, zero_trust.TunnelConfigurationGetParams{
+		AccountID: cloudflare.F(c.accountId),
+	})
 	if err != nil {
 		return domain.TunnelConfiguration{}, fmt.Errorf("failed to get tunnel configs: %v", err)
 	}
@@ -102,9 +103,14 @@ func (c *CloudflareTunnelClient) GetTunnelConfiguration(ctx context.Context, tun
 }
 
 func (c *CloudflareTunnelClient) UpdateTunnelConfiguration(ctx context.Context, tunnelID string, config domain.TunnelConfiguration) error {
-	_, err := c.client.UpdateTunnelConfiguration(ctx, cloudflare.AccountIdentifier(c.accountId), cloudflare.TunnelConfigurationParams{
-		TunnelID: tunnelID,
-		Config:   cloudflare.TunnelConfiguration(config),
+	paramConfig := zero_trust.TunnelConfigurationUpdateParamsConfig{
+		Ingress:       cloudflare.F(config.Ingress),
+		OriginRequest: cloudflare.F(config.OriginRequest),
+	}
+
+	_, err := c.client.ZeroTrust.Tunnels.Configurations.Update(ctx, tunnelID, zero_trust.TunnelConfigurationUpdateParams{
+		AccountID: cloudflare.F(c.accountId),
+		Config:    cloudflare.F(zero_trust.TunnelConfigurationUpdateParamsConfig(config)),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update tunnel configs: %v", err)
