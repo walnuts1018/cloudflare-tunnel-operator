@@ -622,7 +622,7 @@ func (r *CloudflareTunnelReconciler) reconcilePDB(ctx context.Context, cfTunnel 
 	}
 
 	if result != controllerutil.OperationResultNone {
-		logger.Info("reconcile ServiceMonitor", "result", result)
+		logger.Info("reconcile PodDisruptionBudget", "result", result)
 	}
 	return nil
 }
