@@ -69,3 +69,26 @@ func (l TolerationApplyConfigurationList) Ref() []*corev1apply.TolerationApplyCo
 	copy(s, l)
 	return s
 }
+
+type TopologySpreadConstraintApplyConfigurationList []*corev1apply.TopologySpreadConstraintApplyConfiguration
+
+func (l *TopologySpreadConstraintApplyConfigurationList) DeepCopy() *TopologySpreadConstraintApplyConfigurationList {
+	out := new(TopologySpreadConstraintApplyConfigurationList)
+	bytes, err := json.Marshal(l)
+	if err != nil {
+		panic("Failed to marshal")
+	}
+	if err := json.Unmarshal(bytes, out); err != nil {
+		panic("Failed to unmarshal")
+	}
+	return out
+}
+
+func (l TopologySpreadConstraintApplyConfigurationList) Ref() []*corev1apply.TopologySpreadConstraintApplyConfiguration {
+	if l == nil {
+		return nil
+	}
+	s := make([]*corev1apply.TopologySpreadConstraintApplyConfiguration, len(l))
+	copy(s, l)
+	return s
+}
