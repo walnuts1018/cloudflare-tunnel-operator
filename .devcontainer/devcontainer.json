@@ -1,6 +1,6 @@
 {
   "name": "Kubebuilder DevContainer",
-  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:1503bc5a9a9a73cc42e2176759eb3246812d18da-20",
+  "image": "ghcr.io/walnuts1018/kubebuilder-devcontainer-image:3782ddaa48e705929a471b2b403fcbc5abbdcbc8-36",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
     "ghcr.io/devcontainers/features/git:1": {}
@@ -25,6 +25,6 @@
     }
   },
 
-  "postCreateCommand": "make setup",
+  "postCreateCommand": "make setup"
   // "postStartCommand": "tilt up --host 0.0.0.0"
 }
