@@ -24,6 +24,7 @@ def ingress_nginx():
 # Generate manifests and go files
 local_resource('make manifests', manifests(), deps=["api", "internal", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
 local_resource('make generate', go_generate() + generate(), deps=["api", "hooks"], ignore=['*/*/zz_generated.deepcopy.go'])
+local_resource('namespace', 'echo "apiVersion: v1\nkind: Namespace\nmetadata:\n  name: cloudflare-tunnel-operator-system" | kubectl apply -f -')
 
 # Deploy CRD
 local_resource(
