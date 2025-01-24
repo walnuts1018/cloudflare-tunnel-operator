@@ -41,8 +41,8 @@ jobs:
           context: .
           platforms: ${{ matrix.platform }}
           outputs: type=image,name=ghcr.io/walnuts1018/cloudflare-tunnel-operator,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=registry,ref=ghcr.io/walnuts1018/cloudflare-tunnel-operator-cache,scope=${{ matrix.key }}
-          cache-to: type=registry,mode=max,ref=ghcr.io/walnuts1018/cloudflare-tunnel-operator-cache,scope=${{ matrix.key }}
+          cache-from: type=registry,ref=ghcr.io/walnuts1018/cloudflare-tunnel-operator-cache:${{ matrix.key }}
+          cache-to: type=registry,mode=max,ref=ghcr.io/walnuts1018/cloudflare-tunnel-operator-cache:${{ matrix.key }}
 
       - name: Export digest
         run: |
