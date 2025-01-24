@@ -34,10 +34,6 @@ jobs:
         with:
           version: latest
 
-      - name: Get Tag from Release
-        id: GetTag
-        run: echo "ImageTag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
       - name: Build and push Docker images
         uses: docker/build-push-action@v6
         id: build
@@ -83,12 +79,16 @@ jobs:
           username: walnuts1018
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get Tag from Release
+        id: GetTag
+        run: echo "ImageTag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create \
             -t ghcr.io/walnuts1018/cloudflare-tunnel-operator:latest \
-            -t ghcr.io/walnuts1018/cloudflare-tunnel-operator:${{ github.sha }}-${{ github.run_number }} \
+            -t ghcr.io/walnuts1018/cloudflare-tunnel-operator:${{ steps.GetTag.outputs.ImageTag }} \
             $(printf 'ghcr.io/walnuts1018/cloudflare-tunnel-operator@sha256:%s ' *)
 
   chart-release:
