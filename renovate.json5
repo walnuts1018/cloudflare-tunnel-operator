@@ -41,16 +41,5 @@
       ],
       datasourceTemplate: "github-tags",
     },
-        {
-      customType: "regex",
-      fileMatch: [
-        "^.devcontainer/devcontainer.json$",
-      ],
-      matchStringsStrategy: "any",
-      matchStrings: [
-        "\"image\":\\s+\"(?<depName>.*\\/.*?):(?<currentValue>.*)\"",
-      ],
-      datasourceTemplate: "docker",
-    },
   ],
 }
