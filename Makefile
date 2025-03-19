@@ -74,11 +74,11 @@ test-e2e: fmt vet ## Run the e2e tests. Expected an isolated environment using K
 
 .PHONY: lint
 lint: ## Run golangci-lint linter
-	$(GOLANGCI_LINT) run
+	go tool golangci-lint run
 
 .PHONY: lint-fix
 lint-fix: ## Run golangci-lint linter and perform fixes
-	$(GOLANGCI_LINT) run --fix
+	go tool golangci-lint run --fix
 
 #! [kind]
 .PHONY: setup 
@@ -176,7 +176,6 @@ $(LOCALBIN):
 KUBECTL ?= kubectl
 KUSTOMIZE ?= kustomize
 CONTROLLER_GEN ?= controller-gen
-GOLANGCI_LINT = golangci-lint
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
