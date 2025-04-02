@@ -602,7 +602,7 @@ spec:
                   type: object
                 type: array
               image:
-                default: cloudflare/cloudflared:2025.2.1
+                default: cloudflare/cloudflared:2025.4.0
                 description: Specifies the image to use for the cloudflared pod.
                 type: string
               imagePullSecrets:
