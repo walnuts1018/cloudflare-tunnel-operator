@@ -1,44 +1,44 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>walnuts1018/renovate-config"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'github>walnuts1018/renovate-config',
   ],
   customManagers: [
     {
-      customType: "regex",
-      fileMatch: [
-        "^api/.*/.*_types.go$",
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^api/.*/.*_types.go$/',
       ],
-      matchStringsStrategy: "any",
+      matchStringsStrategy: 'any',
       matchStrings: [
-        "\\/\\/\\s\\+kubebuilder:default=\"(?<depName>.*\\/.*?):(?<currentValue>.*)\"",
+        '\\/\\/\\s\\+kubebuilder:default="(?<depName>.*\\/.*?):(?<currentValue>.*)"',
       ],
-      datasourceTemplate: "docker",
+      datasourceTemplate: 'docker',
     },
     {
-      customType: "regex",
-      fileMatch: [
-        "^config/crd/bases/cf-tunnel-operator.walnuts.dev_cloudflaretunnels.yaml$",
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^config/crd/bases/cf-tunnel-operator.walnuts.dev_cloudflaretunnels.yaml$/',
       ],
-      matchStringsStrategy: "any",
+      matchStringsStrategy: 'any',
       matchStrings: [
-        "default:\\s(?<depName>.*\\/.*?):(?<currentValue>.*)"
+        'default:\\s(?<depName>.*\\/.*?):(?<currentValue>.*)',
       ],
-      datasourceTemplate: "docker",
+      datasourceTemplate: 'docker',
     },
     {
-      customType: "regex",
-      fileMatch:[
-        "^config/.*/kustomization.yaml$",
-        "^test/utils/utils.go$",
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^config/.*/kustomization.yaml$/',
+        '/^test/utils/utils.go$/',
       ],
-      matchStringsStrategy: "any",
+      matchStringsStrategy: 'any',
       matchStrings: [
-        "https:\\/\\/github\\.com\\/(?<depName>.*?)\\/releases\\/download\\/(?<currentValue>[^\\/]+)\\/.*\\s*",
-        "https:\\/\\/raw\\.githubusercontent\\.com\\/(?<depName>.*?)\\/refs\\/tags\\/(?<currentValue>[^\\/]+)\\/.*\\s*",
-        "https:\\/\\/raw\\.githubusercontent\\.com\\/(?<depName>[^/]+\\/[^/]+?)\\/(?<currentValue>[^\\/]+?)\\/.*\\s*",
+        'https:\\/\\/github\\.com\\/(?<depName>.*?)\\/releases\\/download\\/(?<currentValue>[^\\/]+)\\/.*\\s*',
+        'https:\\/\\/raw\\.githubusercontent\\.com\\/(?<depName>.*?)\\/refs\\/tags\\/(?<currentValue>[^\\/]+)\\/.*\\s*',
+        'https:\\/\\/raw\\.githubusercontent\\.com\\/(?<depName>[^/]+\\/[^/]+?)\\/(?<currentValue>[^\\/]+?)\\/.*\\s*',
       ],
-      datasourceTemplate: "github-tags",
+      datasourceTemplate: 'github-tags',
     },
   ],
 }
