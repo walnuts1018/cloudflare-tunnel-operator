@@ -5,7 +5,7 @@ go 1.24.0
 tool github.com/golangci/golangci-lint/cmd/golangci-lint
 
 require (
-	dario.cat/mergo v1.0.1
+	dario.cat/mergo v1.0.2
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/cloudflare/cloudflare-go v0.115.0
 	github.com/go-logr/logr v1.4.2
