@@ -8,3 +8,9 @@ kind: Cluster
 name: kind-cf-tunnel-operator-dev
 product: kind
 registry: cf-tunnel-operator-registry
+kindV1Alpha4Cluster:
+  name: my-cluster
+  nodes:
+  - role: control-plane
+  - role: worker
+  - role: worker
