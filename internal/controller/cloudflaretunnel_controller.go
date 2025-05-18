@@ -332,22 +332,6 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 	topologySpreadConstraints := []*corev1apply.TopologySpreadConstraintApplyConfiguration{
 		corev1apply.TopologySpreadConstraint().
 			WithMaxSkew(1).
-			WithTopologyKey("topology.kubernetes.io/zone").
-			WithWhenUnsatisfiable(corev1.ScheduleAnyway).
-			WithLabelSelector(metav1apply.LabelSelector().
-				WithMatchLabels(appLabels(cfTunnel)),
-			).
-			WithMatchLabelKeys("pod-template-hash"),
-		corev1apply.TopologySpreadConstraint().
-			WithMaxSkew(1).
-			WithTopologyKey("topology.kubernetes.io/region").
-			WithWhenUnsatisfiable(corev1.ScheduleAnyway).
-			WithLabelSelector(metav1apply.LabelSelector().
-				WithMatchLabels(appLabels(cfTunnel)),
-			).
-			WithMatchLabelKeys("pod-template-hash"),
-		corev1apply.TopologySpreadConstraint().
-			WithMaxSkew(1).
 			WithTopologyKey("kubernetes.io/hostname").
 			WithWhenUnsatisfiable(corev1.ScheduleAnyway).
 			WithLabelSelector(metav1apply.LabelSelector().
