@@ -62,7 +62,7 @@ var _ = Describe("CloudflareTunnel Webhook", func() {
 			By("calling the Default method to apply defaults")
 			defaulter.Default(ctx, obj)
 			By(fmt.Sprintf("Labelsに%sが設定されていることを確認", consts.DefaultLabelKey))
-			Expect(obj.ObjectMeta.Labels[consts.DefaultLabelKey]).To(Equal("true"))
+			Expect(obj.Labels[consts.DefaultLabelKey]).To(Equal("true"))
 		})
 
 		It(fmt.Sprintf("Default Tunnelでないとき、%s Labelに%vが設定される", consts.DefaultLabelKey, false), func() {
@@ -71,7 +71,7 @@ var _ = Describe("CloudflareTunnel Webhook", func() {
 			By("calling the Default method to apply defaults")
 			defaulter.Default(ctx, obj)
 			By(fmt.Sprintf("Labelsに%sが設定されていることを確認", consts.DefaultLabelKey))
-			Expect(obj.ObjectMeta.Labels[consts.DefaultLabelKey]).To(Equal("false"))
+			Expect(obj.Labels[consts.DefaultLabelKey]).To(Equal("false"))
 		})
 	})
 

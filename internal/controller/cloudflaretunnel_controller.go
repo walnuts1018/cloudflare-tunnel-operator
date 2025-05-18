@@ -71,7 +71,7 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	var cfTunnel cftv1beta1.CloudflareTunnel
 
-	err := r.Client.Get(ctx, req.NamespacedName, &cfTunnel)
+	err := r.Get(ctx, req.NamespacedName, &cfTunnel)
 	if apierrors.IsNotFound(err) {
 		logger.Info("CloudflareTunnel has been deleted. Trying to delete its related resources.")
 		return ctrl.Result{}, nil
@@ -82,7 +82,7 @@ func (r *CloudflareTunnelReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
-	if !cfTunnel.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !cfTunnel.DeletionTimestamp.IsZero() {
 		if controllerutil.ContainsFinalizer(&cfTunnel, finalizerName) {
 			if err := r.CloudflareTunnelManager.DeleteAllDNS(ctx, cfTunnel.Status.TunnelID); err != nil {
 				return ctrl.Result{}, fmt.Errorf("failed to delete CloudflareTunnel: %w", err)
@@ -251,7 +251,7 @@ func (r *CloudflareTunnelReconciler) reconcileSecret(ctx context.Context, cfTunn
 	}
 
 	var current corev1.Service
-	err = r.Client.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
+	err = r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return types.NamespacedName{}, fmt.Errorf("failed to get secret: %w", err)
 	}
@@ -434,7 +434,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 	}
 
 	var current appsv1.Deployment
-	err = r.Client.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
+	err = r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("failed to get deployment: %w", err)
@@ -492,7 +492,7 @@ func (r *CloudflareTunnelReconciler) reconcileService(ctx context.Context, cfTun
 	}
 
 	var current corev1.Service
-	err = r.Client.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
+	err = r.Get(ctx, client.ObjectKey{Namespace: cfTunnel.Namespace, Name: cfTunnel.Name}, &current)
 	if err != nil && !apierrors.IsNotFound(err) {
 		return fmt.Errorf("failed to get service: %w", err)
 	}

@@ -44,10 +44,10 @@ func (d *CloudflareTunnelCustomDefaulter) Default(ctx context.Context, obj runti
 		return fmt.Errorf("expected an CloudflareTunnel object but got %T", obj)
 	}
 
-	if cloudflaretunnel.ObjectMeta.Labels == nil {
-		cloudflaretunnel.ObjectMeta.Labels = make(map[string]string)
+	if cloudflaretunnel.Labels == nil {
+		cloudflaretunnel.Labels = make(map[string]string)
 	}
-	cloudflaretunnel.ObjectMeta.Labels[consts.DefaultLabelKey] = strconv.FormatBool(cloudflaretunnel.Spec.Default)
+	cloudflaretunnel.Labels[consts.DefaultLabelKey] = strconv.FormatBool(cloudflaretunnel.Spec.Default)
 
 	return nil
 }
