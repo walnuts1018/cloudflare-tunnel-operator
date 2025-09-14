@@ -570,20 +570,6 @@ spec:
                             fieldPath:
                               type: string
                           type: object
-                        fileKeyRef:
-                          description: |-
-                            FileKeySelectorApplyConfiguration represents a declarative configuration of the FileKeySelector type for use
-                            with apply.
-                          properties:
-                            key:
-                              type: string
-                            optional:
-                              type: boolean
-                            path:
-                              type: string
-                            volumeName:
-                              type: string
-                          type: object
                         resourceFieldRef:
                           description: |-
                             ResourceFieldSelectorApplyConfiguration represents a declarative configuration of the ResourceFieldSelector type for use
@@ -616,7 +602,6 @@ spec:
                   type: object
                 type: array
               image:
-                default: cloudflare/cloudflared:2025.5.0
                 description: Specifies the image to use for the cloudflared pod.
                 type: string
               imagePullSecrets:
@@ -675,7 +660,7 @@ spec:
                       Claims lists the names of resources, defined in spec.resourceClaims,
                       that are used by this container.
 
-                      This field depends on the
+                      This is an alpha field and requires enabling the
                       DynamicResourceAllocation feature gate.
 
                       This field is immutable. It can only be set for containers.
