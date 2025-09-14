@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: cloudflare-tunnel-operator-system/cloudflare-tunnel-operator-serving-cert
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.19.0
   name: cloudflaretunnels.cf-tunnel-operator.walnuts.dev
 spec:
   group: cf-tunnel-operator.walnuts.dev
@@ -570,6 +570,20 @@ spec:
                             fieldPath:
                               type: string
                           type: object
+                        fileKeyRef:
+                          description: |-
+                            FileKeySelectorApplyConfiguration represents a declarative configuration of the FileKeySelector type for use
+                            with apply.
+                          properties:
+                            key:
+                              type: string
+                            optional:
+                              type: boolean
+                            path:
+                              type: string
+                            volumeName:
+                              type: string
+                          type: object
                         resourceFieldRef:
                           description: |-
                             ResourceFieldSelectorApplyConfiguration represents a declarative configuration of the ResourceFieldSelector type for use
@@ -602,7 +616,6 @@ spec:
                   type: object
                 type: array
               image:
-                default: cloudflare/cloudflared:2025.1.0
                 description: Specifies the image to use for the cloudflared pod.
                 type: string
               imagePullSecrets:
@@ -661,7 +674,7 @@ spec:
                       Claims lists the names of resources, defined in spec.resourceClaims,
                       that are used by this container.
 
-                      This is an alpha field and requires enabling the
+                      This field depends on the
                       DynamicResourceAllocation feature gate.
 
                       This field is immutable. It can only be set for containers.
@@ -752,6 +765,8 @@ spec:
                       can be discarded.
                     format: int32
                     type: integer
+                  nameOverride:
+                    type: string
                   noHappyEyeballs:
                     default: false
                     description: Disable the “happy eyeballs” algorithm for IPv4/IPv6
@@ -935,3 +950,4 @@ spec:
     storage: true
     subresources:
       status: {}
+
