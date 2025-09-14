@@ -602,7 +602,6 @@ spec:
                   type: object
                 type: array
               image:
-                default: cloudflare/cloudflared:2025.5.0
                 description: Specifies the image to use for the cloudflared pod.
                 type: string
               imagePullSecrets:
@@ -752,6 +751,8 @@ spec:
                       can be discarded.
                     format: int32
                     type: integer
+                  nameOverride:
+                    type: string
                   noHappyEyeballs:
                     default: false
                     description: Disable the “happy eyeballs” algorithm for IPv4/IPv6
