@@ -7,11 +7,11 @@
     {
       customType: 'regex',
       managerFilePatterns: [
-        '/^api/.*/.*_types.go$/',
+        '/^internal/controller/cloudflaretunnel_controller.go$/',
       ],
       matchStringsStrategy: 'any',
       matchStrings: [
-        'image\\s=\\s"(?<depName>.*\\/.*?):(?<currentValue>.*)"',
+        'cloudflaredImage\\s=\\s"(?<depName>.*\\/.*?):(?<currentValue>.*)"',
       ],
       datasourceTemplate: 'docker',
     },

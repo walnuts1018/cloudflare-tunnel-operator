@@ -38,6 +38,8 @@ const (
 	MetricsPort    = 60123
 	tunnelTokenKey = "cloudflared-tunnel-token"
 	finalizerName  = "cf-tunnel-operator.walnuts.dev/finalizer"
+
+	cloudflaredImage = "cloudflare/cloudflared:2025.5.0"
 )
 
 // CloudflareTunnelReconciler reconciles a CloudflareTunnel object
@@ -353,7 +355,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 
 	image := cfTunnel.Spec.Image
 	if image == "" {
-		image = "cloudflare/cloudflared:2025.5.0"
+		image = cloudflaredImage
 	}
 
 	imagePullSecrets := make([]*corev1apply.LocalObjectReferenceApplyConfiguration, 0, len(cfTunnel.Spec.ImagePullSecrets))
