@@ -752,6 +752,8 @@ spec:
                       can be discarded.
                     format: int32
                     type: integer
+                  nameOverride:
+                    type: string
                   noHappyEyeballs:
                     default: false
                     description: Disable the “happy eyeballs” algorithm for IPv4/IPv6
