@@ -395,7 +395,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 					WithImagePullSecrets(imagePullSecrets...).
 					WithContainers(corev1apply.Container().
 						WithName("cloudflared").
-						WithImage(cfTunnel.Spec.Image).
+						WithImage(image).
 						WithImagePullPolicy(corev1.PullIfNotPresent).
 						WithArgs(args...).
 						WithEnv(envs...).
