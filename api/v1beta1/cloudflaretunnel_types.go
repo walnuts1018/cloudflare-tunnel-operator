@@ -76,6 +76,9 @@ type PDBSpec struct {
 }
 
 type CloudflareTunnelSettings struct {
+	// +optional
+	NameOverride string `json:"nameOverride,omitempty"`
+
 	// +kubebuilder:default="http_status:404"
 	// +optional
 	CatchAllRule string `json:"catchAllRule,omitempty"`
