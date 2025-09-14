@@ -1,6 +1,6 @@
 module github.com/walnuts1018/cloudflare-tunnel-operator
 
-go 1.24.3
+go 1.25.1
 
 tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
