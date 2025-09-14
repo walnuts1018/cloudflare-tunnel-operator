@@ -570,6 +570,20 @@ spec:
                             fieldPath:
                               type: string
                           type: object
+                        fileKeyRef:
+                          description: |-
+                            FileKeySelectorApplyConfiguration represents a declarative configuration of the FileKeySelector type for use
+                            with apply.
+                          properties:
+                            key:
+                              type: string
+                            optional:
+                              type: boolean
+                            path:
+                              type: string
+                            volumeName:
+                              type: string
+                          type: object
                         resourceFieldRef:
                           description: |-
                             ResourceFieldSelectorApplyConfiguration represents a declarative configuration of the ResourceFieldSelector type for use
@@ -661,7 +675,7 @@ spec:
                       Claims lists the names of resources, defined in spec.resourceClaims,
                       that are used by this container.
 
-                      This is an alpha field and requires enabling the
+                      This field depends on the
                       DynamicResourceAllocation feature gate.
 
                       This field is immutable. It can only be set for containers.
