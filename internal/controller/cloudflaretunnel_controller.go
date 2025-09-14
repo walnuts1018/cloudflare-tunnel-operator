@@ -38,6 +38,8 @@ const (
 	MetricsPort    = 60123
 	tunnelTokenKey = "cloudflared-tunnel-token"
 	finalizerName  = "cf-tunnel-operator.walnuts.dev/finalizer"
+
+	cloudflaredImage = "cloudflare/cloudflared:2025.8.1"
 )
 
 // CloudflareTunnelReconciler reconciles a CloudflareTunnel object
@@ -176,6 +178,13 @@ func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunn
 		}
 	}
 
+	var tunnelName string
+	if cfTunnel.Spec.Settings.NameOverride != "" {
+		tunnelName = cfTunnel.Spec.Settings.NameOverride
+	} else {
+		tunnelName = cfTunnel.Name
+	}
+
 	var token domain.CloudflareTunnelToken
 	if secret.Data != nil {
 		token = domain.CloudflareTunnelToken(secret.Data[tunnelTokenKey])
@@ -186,14 +195,14 @@ func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunn
 		if token != "" {
 			return domain.CloudflareTunnel{
 				ID:   cfTunnel.Status.TunnelID,
-				Name: cfTunnel.Name,
+				Name: tunnelName,
 			}, token, nil
 		} else {
 			token, err := r.CloudflareTunnelManager.GetTunnelToken(ctx, cfTunnel.Status.TunnelID)
 			if err == nil {
 				return domain.CloudflareTunnel{
 					ID:   cfTunnel.Status.TunnelID,
-					Name: cfTunnel.Name,
+					Name: tunnelName,
 				}, token, nil
 			} else {
 				if !errors.Is(err, ErrTunnelNotFound) {
@@ -204,7 +213,7 @@ func (r *CloudflareTunnelReconciler) reconcileTunnel(ctx context.Context, cfTunn
 	}
 
 	// TunnelIDがStatusに存在していないので、Tunnelを作成する
-	tunnel, err := r.CloudflareTunnelManager.CreateTunnel(ctx, cfTunnel.Name)
+	tunnel, err := r.CloudflareTunnelManager.CreateTunnel(ctx, tunnelName)
 	if err != nil {
 		return domain.CloudflareTunnel{}, "", fmt.Errorf("failed to create tunnel: %w", err)
 	}
@@ -344,6 +353,11 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 		topologySpreadConstraints = cfTunnel.Spec.TopologySpreadConstraints.Ref()
 	}
 
+	image := cfTunnel.Spec.Image
+	if image == "" {
+		image = cloudflaredImage
+	}
+
 	imagePullSecrets := make([]*corev1apply.LocalObjectReferenceApplyConfiguration, 0, len(cfTunnel.Spec.ImagePullSecrets))
 	for _, secret := range cfTunnel.Spec.ImagePullSecrets {
 		imagePullSecrets = append(imagePullSecrets, corev1apply.LocalObjectReference().
@@ -381,7 +395,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 					WithImagePullSecrets(imagePullSecrets...).
 					WithContainers(corev1apply.Container().
 						WithName("cloudflared").
-						WithImage(cfTunnel.Spec.Image).
+						WithImage(image).
 						WithImagePullPolicy(corev1.PullIfNotPresent).
 						WithArgs(args...).
 						WithEnv(envs...).
