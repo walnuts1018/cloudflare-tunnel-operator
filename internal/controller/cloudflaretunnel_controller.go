@@ -351,6 +351,11 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 		topologySpreadConstraints = cfTunnel.Spec.TopologySpreadConstraints.Ref()
 	}
 
+	image := cfTunnel.Spec.Image
+	if image == "" {
+		image = "cloudflare/cloudflared:2025.5.0"
+	}
+
 	imagePullSecrets := make([]*corev1apply.LocalObjectReferenceApplyConfiguration, 0, len(cfTunnel.Spec.ImagePullSecrets))
 	for _, secret := range cfTunnel.Spec.ImagePullSecrets {
 		imagePullSecrets = append(imagePullSecrets, corev1apply.LocalObjectReference().

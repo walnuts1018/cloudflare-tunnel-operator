@@ -11,7 +11,7 @@
       ],
       matchStringsStrategy: 'any',
       matchStrings: [
-        '\\/\\/\\s\\+kubebuilder:default="(?<depName>.*\\/.*?):(?<currentValue>.*)"',
+        'image\\s=\\s"(?<depName>.*\\/.*?):(?<currentValue>.*)"',
       ],
       datasourceTemplate: 'docker',
     },
