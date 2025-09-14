@@ -14,7 +14,7 @@ packages:
 - name: kubernetes-sigs/kubebuilder@v4.5.2
 - name: kubernetes-sigs/kind@v0.28.0
 - name: tilt-dev/tilt@v0.35.1
-- name: tilt-dev/ctlptl@v0.8.40
+- name: tilt-dev/ctlptl@v0.8.43
 - name: arttor/helmify@v0.4.18
 - name: kubernetes-sigs/kustomize@kustomize/v5.7.1
 - name: kubernetes-sigs/controller-tools/controller-gen@v0.18.0
