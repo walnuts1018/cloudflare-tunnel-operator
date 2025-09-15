@@ -14,6 +14,7 @@ import (
 	"github.com/caarlos0/env/v11"
 	"github.com/go-logr/logr"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/phsym/console-slog"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/controller"
@@ -58,6 +59,7 @@ func main() {
 	var secureMetrics bool
 	var enableHTTP2 bool
 	var logLevelStr string
+	var logtype string
 	var tlsOpts []func(*tls.Config)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
@@ -70,14 +72,13 @@ func main() {
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
 	flag.StringVar(&logLevelStr, "log-level", "info", "Log level (debug, info, warn, error)")
+	flag.StringVar(&logtype, "log-type", "json", "Log type (json, text)")
 	flag.Parse()
 
 	logLevel := parseLogLevel(logLevelStr)
 
-	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level:     logLevel,
-		AddSource: logLevel == slog.LevelDebug,
-	}))
+	l := createLogger(logLevel, logtype)
+
 	logger := logr.FromSlogHandler(l.Handler())
 	slog.SetDefault(l)
 	klog.SetLogger(logger)
@@ -221,4 +222,27 @@ func parseLogLevel(v string) slog.Level {
 		slog.Warn("Invalid log level, use default level: info")
 		return slog.LevelInfo
 	}
+}
+
+func createLogger(logLevel slog.Level, logType string) *slog.Logger {
+	if logType != "json" && logType != "text" {
+		slog.Warn("Invalid log type, use default type: json")
+		logType = "json"
+	}
+
+	var handler slog.Handler
+	switch logType {
+	case "text":
+		handler = console.NewHandler(os.Stdout, &console.HandlerOptions{
+			Level:     logLevel,
+			AddSource: logLevel == slog.LevelDebug,
+		})
+	case "json", "":
+		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level:     logLevel,
+			AddSource: logLevel == slog.LevelDebug,
+		})
+	}
+
+	return slog.New(handler)
 }
