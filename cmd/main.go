@@ -77,9 +77,7 @@ func main() {
 	flag.StringVar(&logtype, "log-type", "json", "Log type (json, text)")
 	flag.Parse()
 
-	logLevel := parseLogLevel(logLevelStr)
-
-	l := createLogger(logLevel, logtype)
+	l := createLogger(logLevelStr, logtype)
 
 	logger := logr.FromSlogHandler(l.Handler())
 	slog.SetDefault(l)
@@ -203,38 +201,48 @@ func main() {
 	}
 }
 
-func parseLogLevel(v string) slog.Level {
-	switch strings.ToLower(v) {
-	case "":
-		return slog.LevelInfo
+type LogType string
+
+const (
+	LogTypeJSON LogType = "json"
+	LogTypeText LogType = "text"
+)
+
+func createLogger(logLevelStr, logTypeStr string) *slog.Logger {
+	var logLevel slog.Level
+	switch strings.ToLower(logLevelStr) {
 	case "debug":
-		return slog.LevelDebug
+		logLevel = slog.LevelDebug
 	case "info":
-		return slog.LevelInfo
+		logLevel = slog.LevelInfo
 	case "warn":
-		return slog.LevelWarn
+		logLevel = slog.LevelWarn
 	case "error":
-		return slog.LevelError
+		logLevel = slog.LevelError
 	default:
 		slog.Warn("Invalid log level, use default level: info")
-		return slog.LevelInfo
+		logLevel = slog.LevelInfo
 	}
-}
 
-func createLogger(logLevel slog.Level, logType string) *slog.Logger {
-	if logType != "json" && logType != "text" {
+	var logType LogType
+	switch strings.ToLower(logTypeStr) {
+	case "json":
+		logType = LogTypeJSON
+	case "text":
+		logType = LogTypeText
+	default:
 		slog.Warn("Invalid log type, use default type: json")
-		logType = "json"
+		logType = LogTypeJSON
 	}
 
 	var handler slog.Handler
 	switch logType {
-	case "text":
+	case LogTypeText:
 		handler = console.NewHandler(os.Stdout, &console.HandlerOptions{
 			Level:     logLevel,
 			AddSource: logLevel == slog.LevelDebug,
 		})
-	case "json", "":
+	case LogTypeJSON:
 		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level:     logLevel,
 			AddSource: logLevel == slog.LevelDebug,
