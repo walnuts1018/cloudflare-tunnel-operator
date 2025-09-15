@@ -21,6 +21,7 @@ import (
 	webhookcftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/internal/webhook/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/external"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/utils/random"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -40,8 +41,9 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-
 	utilruntime.Must(cftunneloperatorv1beta1.AddToScheme(scheme))
+	utilruntime.Must(monitoringv1.AddToScheme(scheme))
+	utilruntime.Must(apiextensionsv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -129,11 +131,6 @@ func main() {
 		// TODO(user): If CertDir, CertName, and KeyName are not specified, controller-runtime will automatically
 		// generate self-signed certificates for the metrics server. While convenient for development and testing,
 		// this setup is not recommended for production.
-	}
-
-	if err := monitoringv1.AddToScheme(scheme); err != nil {
-		setupLog.Error(err, "unable to add prometheus-operator scheme")
-		os.Exit(1)
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{

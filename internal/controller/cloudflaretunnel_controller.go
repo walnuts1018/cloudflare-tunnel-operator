@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
@@ -12,6 +13,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	policyv1 "k8s.io/api/policy/v1"
+	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	meta "k8s.io/apimachinery/pkg/api/meta"
@@ -57,7 +59,10 @@ type CloudflareTunnelReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=policy,resources=poddisruptionbudgets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=events,verbs=create;update;patch
+
+// +kubebuilder:rbac:groups=apiextensions.k8s.io,resources=customresourcedefinitions,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -520,6 +525,7 @@ func (r *CloudflareTunnelReconciler) reconcileServiceMonitor(ctx context.Context
 	logger := log.FromContext(ctx)
 
 	if !cfTunnel.Spec.EnableServiceMonitor {
+		slog.Debug("ServiceMonitor is disabled. Skipping reconciliation.", "name", cfTunnel.Name, "namespace", cfTunnel.Namespace)
 		return nil
 	}
 
@@ -732,13 +738,26 @@ func (r *CloudflareTunnelReconciler) updateStatus(ctx context.Context, cfTunnel 
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CloudflareTunnelReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
+	builder := ctrl.NewControllerManagedBy(mgr).
 		For(&cftv1beta1.CloudflareTunnel{}).
+		Owns(&corev1.Secret{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
-		Owns(&monitoringv1.ServiceMonitor{}).
-		Named("cloudflaretunnel").
-		Complete(r)
+		Owns(&policyv1.PodDisruptionBudget{})
+
+	// Prometheus Operatorがインストールされていない環境でも動作するようにする
+	if err := mgr.GetAPIReader().Get(context.Background(), types.NamespacedName{Name: "servicemonitors.monitoring.coreos.com"}, &apiextensions.CustomResourceDefinition{}); err != nil {
+		if apierrors.IsNotFound(err) {
+			slog.Info("ServiceMonitor CRD not found. Skipping watching ServiceMonitor.")
+		} else {
+			return fmt.Errorf("failed to check ServiceMonitor CRD: %w", err)
+		}
+	} else {
+		builder = builder.Owns(&monitoringv1.ServiceMonitor{})
+	}
+
+	builder = builder.Named("cloudflaretunnel")
+	return builder.Complete(r)
 }
 
 func controllerReference(cfTunnel cftv1beta1.CloudflareTunnel, scheme *runtime.Scheme) (*metav1apply.OwnerReferenceApplyConfiguration, error) {
