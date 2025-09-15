@@ -14,12 +14,14 @@ import (
 	"github.com/caarlos0/env/v11"
 	"github.com/go-logr/logr"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/phsym/console-slog"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/internal/controller"
 	webhookcftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/internal/webhook/v1beta1"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/external"
 	"github.com/walnuts1018/cloudflare-tunnel-operator/pkg/utils/random"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -39,8 +41,9 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-
 	utilruntime.Must(cftunneloperatorv1beta1.AddToScheme(scheme))
+	utilruntime.Must(monitoringv1.AddToScheme(scheme))
+	utilruntime.Must(apiextensionsv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -58,6 +61,7 @@ func main() {
 	var secureMetrics bool
 	var enableHTTP2 bool
 	var logLevelStr string
+	var logtype string
 	var tlsOpts []func(*tls.Config)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
@@ -70,14 +74,11 @@ func main() {
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
 	flag.StringVar(&logLevelStr, "log-level", "info", "Log level (debug, info, warn, error)")
+	flag.StringVar(&logtype, "log-type", "json", "Log type (json, text)")
 	flag.Parse()
 
-	logLevel := parseLogLevel(logLevelStr)
+	l := createLogger(logLevelStr, logtype)
 
-	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level:     logLevel,
-		AddSource: logLevel == slog.LevelDebug,
-	}))
 	logger := logr.FromSlogHandler(l.Handler())
 	slog.SetDefault(l)
 	klog.SetLogger(logger)
@@ -128,11 +129,6 @@ func main() {
 		// TODO(user): If CertDir, CertName, and KeyName are not specified, controller-runtime will automatically
 		// generate self-signed certificates for the metrics server. While convenient for development and testing,
 		// this setup is not recommended for production.
-	}
-
-	if err := monitoringv1.AddToScheme(scheme); err != nil {
-		setupLog.Error(err, "unable to add prometheus-operator scheme")
-		os.Exit(1)
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -205,20 +201,53 @@ func main() {
 	}
 }
 
-func parseLogLevel(v string) slog.Level {
-	switch strings.ToLower(v) {
-	case "":
-		return slog.LevelInfo
+type LogType string
+
+const (
+	LogTypeJSON LogType = "json"
+	LogTypeText LogType = "text"
+)
+
+func createLogger(logLevelStr, logTypeStr string) *slog.Logger {
+	var logLevel slog.Level
+	switch strings.ToLower(logLevelStr) {
 	case "debug":
-		return slog.LevelDebug
+		logLevel = slog.LevelDebug
 	case "info":
-		return slog.LevelInfo
+		logLevel = slog.LevelInfo
 	case "warn":
-		return slog.LevelWarn
+		logLevel = slog.LevelWarn
 	case "error":
-		return slog.LevelError
+		logLevel = slog.LevelError
 	default:
 		slog.Warn("Invalid log level, use default level: info")
-		return slog.LevelInfo
+		logLevel = slog.LevelInfo
 	}
+
+	var logType LogType
+	switch strings.ToLower(logTypeStr) {
+	case "json":
+		logType = LogTypeJSON
+	case "text":
+		logType = LogTypeText
+	default:
+		slog.Warn("Invalid log type, use default type: json")
+		logType = LogTypeJSON
+	}
+
+	var handler slog.Handler
+	switch logType {
+	case LogTypeText:
+		handler = console.NewHandler(os.Stdout, &console.HandlerOptions{
+			Level:     logLevel,
+			AddSource: logLevel == slog.LevelDebug,
+		})
+	case LogTypeJSON:
+		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level:     logLevel,
+			AddSource: logLevel == slog.LevelDebug,
+		})
+	}
+
+	return slog.New(handler)
 }

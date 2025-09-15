@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/lmittmann/tint"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/phsym/console-slog"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	cftunneloperatorv1beta1 "github.com/walnuts1018/cloudflare-tunnel-operator/api/v1beta1"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -49,7 +49,7 @@ func TestAPIs(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	l := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+	l := slog.New(console.NewHandler(os.Stdout, &console.HandlerOptions{
 		Level:     slog.LevelDebug,
 		AddSource: true,
 	}))
