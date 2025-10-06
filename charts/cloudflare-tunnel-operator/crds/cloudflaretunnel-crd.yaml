@@ -661,6 +661,104 @@ spec:
                       be available at any given time.
                     x-kubernetes-int-or-string: true
                 type: object
+              podSecurityContext:
+                description: |-
+                  PodSecurityContextApplyConfiguration represents a declarative configuration of the PodSecurityContext type for use
+                  with apply.
+                properties:
+                  appArmorProfile:
+                    description: |-
+                      AppArmorProfileApplyConfiguration represents a declarative configuration of the AppArmorProfile type for use
+                      with apply.
+                    properties:
+                      localhostProfile:
+                        type: string
+                      type:
+                        type: string
+                    type: object
+                  fsGroup:
+                    format: int64
+                    type: integer
+                  fsGroupChangePolicy:
+                    description: |-
+                      PodFSGroupChangePolicy holds policies that will be used for applying fsGroup to a volume
+                      when volume is mounted.
+                    type: string
+                  runAsGroup:
+                    format: int64
+                    type: integer
+                  runAsNonRoot:
+                    type: boolean
+                  runAsUser:
+                    format: int64
+                    type: integer
+                  seLinuxChangePolicy:
+                    description: PodSELinuxChangePolicy defines how the container's
+                      SELinux label is applied to all volumes used by the Pod.
+                    type: string
+                  seLinuxOptions:
+                    description: |-
+                      SELinuxOptionsApplyConfiguration represents a declarative configuration of the SELinuxOptions type for use
+                      with apply.
+                    properties:
+                      level:
+                        type: string
+                      role:
+                        type: string
+                      type:
+                        type: string
+                      user:
+                        type: string
+                    type: object
+                  seccompProfile:
+                    description: |-
+                      SeccompProfileApplyConfiguration represents a declarative configuration of the SeccompProfile type for use
+                      with apply.
+                    properties:
+                      localhostProfile:
+                        type: string
+                      type:
+                        description: SeccompProfileType defines the supported seccomp
+                          profile types.
+                        type: string
+                    type: object
+                  supplementalGroups:
+                    items:
+                      format: int64
+                      type: integer
+                    type: array
+                  supplementalGroupsPolicy:
+                    description: |-
+                      SupplementalGroupsPolicy defines how supplemental groups
+                      of the first container processes are calculated.
+                    type: string
+                  sysctls:
+                    items:
+                      description: |-
+                        SysctlApplyConfiguration represents a declarative configuration of the Sysctl type for use
+                        with apply.
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                      type: object
+                    type: array
+                  windowsOptions:
+                    description: |-
+                      WindowsSecurityContextOptionsApplyConfiguration represents a declarative configuration of the WindowsSecurityContextOptions type for use
+                      with apply.
+                    properties:
+                      gmsaCredentialSpec:
+                        type: string
+                      gmsaCredentialSpecName:
+                        type: string
+                      hostProcess:
+                        type: boolean
+                      runAsUserName:
+                        type: string
+                    type: object
+                type: object
               replicas:
                 default: 1
                 description: Replicas is the number of cloudflared pods.
@@ -723,6 +821,94 @@ spec:
                       If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
                       otherwise to an implementation-defined value. Requests cannot exceed Limits.
                       More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                type: object
+              securityContext:
+                description: |-
+                  SecurityContextApplyConfiguration represents a declarative configuration of the SecurityContext type for use
+                  with apply.
+                properties:
+                  allowPrivilegeEscalation:
+                    type: boolean
+                  appArmorProfile:
+                    description: |-
+                      AppArmorProfileApplyConfiguration represents a declarative configuration of the AppArmorProfile type for use
+                      with apply.
+                    properties:
+                      localhostProfile:
+                        type: string
+                      type:
+                        type: string
+                    type: object
+                  capabilities:
+                    description: |-
+                      CapabilitiesApplyConfiguration represents a declarative configuration of the Capabilities type for use
+                      with apply.
+                    properties:
+                      add:
+                        items:
+                          description: Capability represent POSIX capabilities type
+                          type: string
+                        type: array
+                      drop:
+                        items:
+                          description: Capability represent POSIX capabilities type
+                          type: string
+                        type: array
+                    type: object
+                  privileged:
+                    type: boolean
+                  procMount:
+                    type: string
+                  readOnlyRootFilesystem:
+                    type: boolean
+                  runAsGroup:
+                    format: int64
+                    type: integer
+                  runAsNonRoot:
+                    type: boolean
+                  runAsUser:
+                    format: int64
+                    type: integer
+                  seLinuxOptions:
+                    description: |-
+                      SELinuxOptionsApplyConfiguration represents a declarative configuration of the SELinuxOptions type for use
+                      with apply.
+                    properties:
+                      level:
+                        type: string
+                      role:
+                        type: string
+                      type:
+                        type: string
+                      user:
+                        type: string
+                    type: object
+                  seccompProfile:
+                    description: |-
+                      SeccompProfileApplyConfiguration represents a declarative configuration of the SeccompProfile type for use
+                      with apply.
+                    properties:
+                      localhostProfile:
+                        type: string
+                      type:
+                        description: SeccompProfileType defines the supported seccomp
+                          profile types.
+                        type: string
+                    type: object
+                  windowsOptions:
+                    description: |-
+                      WindowsSecurityContextOptionsApplyConfiguration represents a declarative configuration of the WindowsSecurityContextOptions type for use
+                      with apply.
+                    properties:
+                      gmsaCredentialSpec:
+                        type: string
+                      gmsaCredentialSpecName:
+                        type: string
+                      hostProcess:
+                        type: boolean
+                      runAsUserName:
+                        type: string
                     type: object
                 type: object
               settings:
