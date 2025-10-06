@@ -392,9 +392,16 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 				WithSpec(corev1apply.PodSpec().
 					WithTopologySpreadConstraints(topologySpreadConstraints...).
 					WithSecurityContext(corev1apply.PodSecurityContext().
-						WithSysctls(corev1apply.Sysctl().
-							WithName("net.ipv4.ping_group_range").
-							WithValue("0 2147483647"),
+						WithSysctls(
+							corev1apply.Sysctl().
+								WithName("net.ipv4.ping_group_range").
+								WithValue("0 2147483647"),
+							corev1apply.Sysctl().
+								WithName("net.core.rmem_max").
+								WithValue("7500000"),
+							corev1apply.Sysctl().
+								WithName("net.core.wmem_max").
+								WithValue("7500000"),
 						),
 					).
 					WithImagePullSecrets(imagePullSecrets...).
