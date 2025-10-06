@@ -92,3 +92,39 @@ func (l TopologySpreadConstraintApplyConfigurationList) Ref() []*corev1apply.Top
 	copy(s, l)
 	return s
 }
+
+type PodSecurityContextApplyConfiguration corev1apply.PodSecurityContextApplyConfiguration
+
+func (p *PodSecurityContextApplyConfiguration) DeepCopy() *PodSecurityContextApplyConfiguration {
+	out := new(PodSecurityContextApplyConfiguration)
+	bytes, err := json.Marshal(p)
+	if err != nil {
+		panic("Failed to marshal")
+	}
+	if err := json.Unmarshal(bytes, out); err != nil {
+		panic("Failed to unmarshal")
+	}
+	return out
+}
+
+func (p PodSecurityContextApplyConfiguration) Ref() *corev1apply.PodSecurityContextApplyConfiguration {
+	return (*corev1apply.PodSecurityContextApplyConfiguration)(&p)
+}
+
+type SecurityContextApplyConfiguration corev1apply.SecurityContextApplyConfiguration
+
+func (s *SecurityContextApplyConfiguration) DeepCopy() *SecurityContextApplyConfiguration {
+	out := new(SecurityContextApplyConfiguration)
+	bytes, err := json.Marshal(s)
+	if err != nil {
+		panic("Failed to marshal")
+	}
+	if err := json.Unmarshal(bytes, out); err != nil {
+		panic("Failed to unmarshal")
+	}
+	return out
+}
+
+func (s SecurityContextApplyConfiguration) Ref() *corev1apply.SecurityContextApplyConfiguration {
+	return (*corev1apply.SecurityContextApplyConfiguration)(&s)
+}

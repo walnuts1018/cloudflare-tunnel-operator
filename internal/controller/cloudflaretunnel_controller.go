@@ -380,6 +380,22 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 		args = cfTunnel.Spec.ArgsOverride
 	}
 
+	podSecurityContext := cfTunnel.Spec.PodSecurityContext.Ref()
+	if podSecurityContext == nil {
+		podSecurityContext = corev1apply.PodSecurityContext().
+			WithSysctls(
+				corev1apply.Sysctl().
+					WithName("net.ipv4.ping_group_range").
+					WithValue("0 2147483647"),
+			)
+	}
+
+	securityContext := cfTunnel.Spec.SecurityContext.Ref()
+	if securityContext == nil {
+		securityContext = corev1apply.SecurityContext().
+			WithReadOnlyRootFilesystem(true)
+	}
+
 	labels := appLabels(cfTunnel)
 	deployment := appsv1apply.Deployment(cfTunnel.Name, cfTunnel.Namespace).
 		WithLabels(labels).
@@ -391,19 +407,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 				WithLabels(labels).
 				WithSpec(corev1apply.PodSpec().
 					WithTopologySpreadConstraints(topologySpreadConstraints...).
-					WithSecurityContext(corev1apply.PodSecurityContext().
-						WithSysctls(
-							corev1apply.Sysctl().
-								WithName("net.ipv4.ping_group_range").
-								WithValue("0 2147483647"),
-							corev1apply.Sysctl().
-								WithName("net.core.rmem_max").
-								WithValue("7500000"),
-							corev1apply.Sysctl().
-								WithName("net.core.wmem_max").
-								WithValue("7500000"),
-						),
-					).
+					WithSecurityContext(podSecurityContext).
 					WithImagePullSecrets(imagePullSecrets...).
 					WithContainers(corev1apply.Container().
 						WithName("cloudflared").
@@ -417,9 +421,7 @@ func (r *CloudflareTunnelReconciler) reconcileDeployment(ctx context.Context, cf
 							WithContainerPort(MetricsPort),
 						).
 						WithResources(resourceRequirements).
-						WithSecurityContext(corev1apply.SecurityContext().
-							WithReadOnlyRootFilesystem(true),
-						).
+						WithSecurityContext(securityContext).
 						WithLivenessProbe(corev1apply.Probe().
 							WithHTTPGet(corev1apply.HTTPGetAction().
 								WithPath("/ready").

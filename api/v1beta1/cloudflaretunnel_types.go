@@ -62,6 +62,12 @@ type CloudflareTunnelSpec struct {
 
 	// +optional
 	Settings CloudflareTunnelSettings `json:"settings,omitempty"`
+
+	// +optional
+	PodSecurityContext *PodSecurityContextApplyConfiguration `json:"podSecurityContext,omitempty"`
+
+	// +optional
+	SecurityContext *SecurityContextApplyConfiguration `json:"securityContext,omitempty"`
 }
 
 type PDBSpec struct {
