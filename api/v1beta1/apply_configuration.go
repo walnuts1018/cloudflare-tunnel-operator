@@ -108,7 +108,7 @@ func (p *PodSecurityContextApplyConfiguration) DeepCopy() *PodSecurityContextApp
 }
 
 func (p *PodSecurityContextApplyConfiguration) Ref() *corev1apply.PodSecurityContextApplyConfiguration {
-	return (*corev1apply.PodSecurityContextApplyConfiguration)(&p)
+	return (*corev1apply.PodSecurityContextApplyConfiguration)(p)
 }
 
 type SecurityContextApplyConfiguration corev1apply.SecurityContextApplyConfiguration
@@ -126,5 +126,5 @@ func (s *SecurityContextApplyConfiguration) DeepCopy() *SecurityContextApplyConf
 }
 
 func (s *SecurityContextApplyConfiguration) Ref() *corev1apply.SecurityContextApplyConfiguration {
-	return (*corev1apply.SecurityContextApplyConfiguration)(&s)
+	return (*corev1apply.SecurityContextApplyConfiguration)(s)
 }
