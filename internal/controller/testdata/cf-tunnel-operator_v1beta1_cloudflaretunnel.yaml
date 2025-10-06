@@ -144,3 +144,8 @@ spec:
   enableServiceMonitor: true
   podDisruptionBudget:
     minAvailable: 1
+  podSecurityContext:
+    fsGroup: 1000
+    runAsUser: 1000
+  securityContext:
+    privileged: true
