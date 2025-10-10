@@ -355,12 +355,7 @@ func getHosts(ingress networkingv1.Ingress) []host {
 }
 
 func checkTLS(host string, TLSHosts []string) bool {
-	for _, tlshost := range TLSHosts {
-		if host == tlshost {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(TLSHosts, host)
 }
 
 func detectCloudflareTunnelName(annotations map[string]string) (types.NamespacedName, error) {
@@ -414,7 +409,7 @@ func (r *IngressReconciler) finalizeIngress(ctx context.Context, ingress *networ
 	}
 
 	hosts := getHosts(*ingress)
-	if err := r.removeCloudflareTunnelConfig(ctx, "", hosts, cftv1beta1.CloudflareTunnelSettings{}); err != nil {
+	if err := r.removeCloudflareTunnelConfig(ctx, "", hosts, cfTunnel.Spec.Settings); err != nil {
 		return fmt.Errorf("failed to remove Cloudflare Tunnel config: %w", err)
 	}
 	for _, host := range hosts {
