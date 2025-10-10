@@ -383,7 +383,7 @@ func detectCloudflareTunnelName(annotations map[string]string) (types.Namespaced
 
 func checkToBeIgnored(annotations map[string]string) bool {
 	v, ok := annotations[ignoreAnnotation]
-	return ok && !(strings.ToLower(v) == "false" || v == "0")
+	return ok && (strings.ToLower(v) != "false" && v != "0")
 }
 
 func (r *IngressReconciler) finalizeIngress(ctx context.Context, ingress *networkingv1.Ingress) error {
