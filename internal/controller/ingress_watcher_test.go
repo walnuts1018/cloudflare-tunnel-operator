@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/netip"
 	"reflect"
-	"slices"
 	"sync"
 	"testing"
 
@@ -79,7 +78,7 @@ func Test_getHosts(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := slices.Collect(getHosts(tt.args.ingress))
+			got := getHosts(tt.args.ingress)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("getHosts() = %v, want %v", got, tt.want)
 			}
@@ -95,7 +94,7 @@ func TestIngressReconciler_updateCloudflareTunnelConfig(t *testing.T) {
 
 	type args struct {
 		tunnelID string
-		host     host
+		hosts    []host
 		IP       netip.Addr
 	}
 	tests := []struct {
@@ -124,9 +123,11 @@ func TestIngressReconciler_updateCloudflareTunnelConfig(t *testing.T) {
 			},
 			args: args{
 				tunnelID: "test",
-				host: host{
-					Host: "example3.walnuts.dev",
-					TLS:  true,
+				hosts: []host{
+					{
+						Host: "example3.walnuts.dev",
+						TLS:  true,
+					},
 				},
 				IP: netip.MustParseAddr("192.168.0.1"),
 			},
@@ -174,7 +175,7 @@ func TestIngressReconciler_updateCloudflareTunnelConfig(t *testing.T) {
 				},
 			)
 
-			if err := r.updateCloudflareTunnelConfig(ctx, tt.args.tunnelID, tt.args.host, tt.args.IP, cftv1beta1.CloudflareTunnelSettings{
+			if err := r.appendCloudflareTunnelConfig(ctx, tt.args.tunnelID, tt.args.hosts, tt.args.IP, cftv1beta1.CloudflareTunnelSettings{
 				CatchAllRule: "CatchAll",
 			}); err != nil {
 				t.Errorf("IngressReconciler.updateCloudflareTunnelConfig() error = %v", err)

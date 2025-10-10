@@ -170,8 +170,8 @@ func (c *CloudflareTunnelClient) UpdateDNS(ctx context.Context, tunnelID string,
 	return nil
 }
 
-func (c *CloudflareTunnelClient) DeleteDNS(ctx context.Context, tunnelID string, record domain.DNSRecord) error {
-	if err := c.client.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), record.ID); err != nil {
+func (c *CloudflareTunnelClient) DeleteDNS(ctx context.Context, tunnelID string, recordID string) error {
+	if err := c.client.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(c.zoneID), recordID); err != nil {
 		return fmt.Errorf("failed to delete DNS record: %v", err)
 	}
 	return nil
