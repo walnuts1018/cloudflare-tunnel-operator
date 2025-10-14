@@ -41,7 +41,7 @@ const (
 	tunnelTokenKey = "cloudflared-tunnel-token"
 	finalizerName  = "cf-tunnel-operator.walnuts.dev/finalizer"
 
-	cloudflaredImage = "cloudflare/cloudflared:2025.9.1"
+	cloudflaredImage = "cloudflare/cloudflared:2025.10.0"
 )
 
 // CloudflareTunnelReconciler reconciles a CloudflareTunnel object
