@@ -1,13 +1,14 @@
 module github.com/walnuts1018/cloudflare-tunnel-operator
 
-go 1.25.1
+go 1.26
 
 tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
 require (
 	dario.cat/mergo v1.0.2
 	github.com/caarlos0/env/v11 v11.3.1
-	github.com/cloudflare/cloudflare-go v0.116.0
+	github.com/cloudflare/cloudflare-go v0.119.0
+	github.com/cloudflare/cloudflare-go/v7 v7.13.1
 	github.com/go-logr/logr v1.4.3
 	github.com/google/go-cmp v0.7.0
 	github.com/joho/godotenv v1.5.1
