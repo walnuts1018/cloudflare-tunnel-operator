@@ -1,6 +1,6 @@
 module github.com/walnuts1018/cloudflare-tunnel-operator
 
-go 1.25.1
+go 1.26
 
 tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
@@ -22,7 +22,7 @@ require (
 	k8s.io/apimachinery v0.34.1
 	k8s.io/client-go v0.34.1
 	k8s.io/klog/v2 v2.130.1
-	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
+	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 	sigs.k8s.io/controller-runtime v0.20.4
 	sigs.k8s.io/yaml v1.6.0
 )
