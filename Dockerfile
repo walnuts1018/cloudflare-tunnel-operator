@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/ \
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM gcr.io/distroless/static:nonroot@sha256:8ce6dd87e9823c5b48dcfb2c8604714ccb351ce59607327bcc4957448da279b5
 WORKDIR /
 COPY --from=builder /workspace/manager .
 USER 65532:65532
